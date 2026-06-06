@@ -1060,7 +1060,7 @@ function logGenerated(name,recipient,itemRef,bureau,deadlineDays){
   var key=itemRef+'|'+name+'|'+(bureau||'');
   var dup=(person().letters||[]).some(function(e){return (e.itemRef+'|'+e.name+'|'+(e.bureau||''))===key && ['Drafted','Printed','Sent','Response received'].indexOf(e.status)>=0;});
   if(dup)return false;
-  var round=1;person().letters.forEach(function(e){if(e.itemRef===itemRef)round++;});
+  var round=1;person().letters.forEach(function(e){if(e.itemRef===itemRef&&e.name===name&&(e.bureau||'')===(bureau||''))round++;});
   person().letters.push({id:uid(),name:name,recipient:recipient,itemRef:itemRef,bureau:bureau||'',dateSent:'',deadlineDays:deadlineDays||30,method:'',tracking:'',round:round,status:'Drafted',outcome:''});
   return true;
 }
