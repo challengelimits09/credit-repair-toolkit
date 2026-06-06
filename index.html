@@ -181,6 +181,8 @@
     <button class="hbtn" onclick="exportData()">⬇ Backup</button>
     <button class="hbtn" onclick="document.getElementById('importFile').click()">⬆ Restore</button>
     <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(event)">
+    <button class="hbtn" onclick="document.getElementById('mergeFile').click()">⊕ Add from file</button>
+    <input type="file" id="mergeFile" accept="application/json" style="display:none" onchange="mergeImportFile(event)">
     <button class="hbtn" onclick="resetAll()">Reset</button>
   </div>
 </header>
@@ -1297,6 +1299,8 @@ function renderResources(){
 function exportData(){var blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='credit-toolkit-backup-'+todayISO()+'.json';a.click();toast('Backup downloaded');}
 function importData(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{DATA=normalize(JSON.parse(r.result));save();refreshAll();toast('Backup restored');go('start');}catch(e){toast('That file could not be read');}};r.readAsText(f);ev.target.value='';}
 function resetAll(){if(!confirm('This erases ALL data for EVERYONE on this device (all people, items, letters). Export a backup first if you want to keep it. Continue?'))return;localStorage.removeItem(KEY);DATA=defaultData();refreshAll();toast('All data cleared');go('start');}
+/* Add the people from a backup file WITHOUT replacing what's already here (e.g., pull your wife's profile onto this Mac) */
+function mergeImportFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=normalize(JSON.parse(r.result));var ids=DATA.people.map(function(p){return p.id;});var first=null,add=0;d.people.forEach(function(np){if(ids.indexOf(np.id)>=0)np.id=uid();np.profile=np.profile||{};np.items=np.items||[];np.letters=np.letters||[];np.reports=np.reports||[];np.label=np.label||'Imported';DATA.people.push(np);ids.push(np.id);if(!first)first=np.id;add++;});if(first)DATA.activePersonId=first;save();refreshAll();go('overview');toast(LX(add+' profile(s) added — switched to it','Se agregaron '+add+' perfil(es) — cambiado a él'));}catch(e){toast(LX('Could not read that file','No se pudo leer ese archivo'));}};r.readAsText(f);ev.target.value='';}
 
 /* ============================ REPORT IMPORT / PARSER ============================ */
 var CAT_OPTS=[['collection','Collection'],['chargeoff','Charge-off'],['account_late','Late payments'],['repossession','Repossession'],['public_record','Public record'],['inquiry','Hard inquiry'],['not_mine_fraud','Not mine / fraud'],['personal_info','Personal info'],['other','Other']];
@@ -1563,7 +1567,7 @@ var ES={
 'Dispute letters · strategy · tracking — all on your device':'Cartas de disputa · estrategia · seguimiento — todo en tu dispositivo',
 '👤 Whose credit:':'👤 Crédito de:','+ Add person':'+ Agregar persona','Rename':'Renombrar','Remove':'Quitar',
 '🔒 100% private — saved only in this browser':'🔒 100% privado — guardado solo en este navegador',
-'⬇ Backup':'⬇ Respaldo','⬆ Restore':'⬆ Restaurar','Reset':'Reiniciar',
+'⬇ Backup':'⬇ Respaldo','⬆ Restore':'⬆ Restaurar','⊕ Add from file':'⊕ Agregar de archivo','Reset':'Reiniciar',
 'Start Here':'Empezar aquí','My Info':'Mi información','Negative Items':'Ítems negativos','📊 Overview':'📊 Resumen','Strategy':'Estrategia','Generate Letters':'Generar cartas','Tracker':'Seguimiento','Know Your Rights':'Tus derechos','Resources':'Recursos',
 /* start */
 'Fix your credit the legal, methodical way.':'Repara tu crédito de forma legal y metódica.',
