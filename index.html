@@ -288,6 +288,8 @@
       </div>
       <div class="field" style="max-width:340px"><label>AI model (powers Laz &amp; the PDF reader)</label><select id="ai_model" onchange="setAiModel()"><option value="gpt-4o">Best — GPT-4o (recommended)</option><option value="gpt-4o-mini">Cheaper &amp; faster — GPT-4o-mini</option></select></div>
       <div style="color:var(--muted);font-size:12.5px">Tip: you can select all 3 bureau PDFs at once. GPT-4o costs a few cents per report (mini is ~half a cent). Don't have a key? Use the free manual options below.</div>
+      <button class="btn alt" style="margin-top:8px" onclick="fullAudit()">📖 Full report audit — read top to bottom</button>
+      <div style="color:var(--muted);font-size:12px;margin-top:4px">Reads your whole uploaded report end-to-end and gives a complete breakdown (totals, items 7+ years old, inquiries…). Results appear in the Laz chat.</div>
       <div id="ai_status"></div>
     </div>
 
@@ -1431,6 +1433,44 @@ function aiIngest(ev){
   seq.then(function(){save();renderItems();renderOverview();renderStats();ev.target.value='';setAiStatus('✅ Done — <b>'+added+' added, '+merged+' merged</b>.'+(errs.length?'<br>Issues: '+errs.join('; '):''),errs.length?'warn':'good');toast(added+' added, '+merged+' merged');if(added||merged)setTimeout(function(){go('overview');},900);});
 }
 
+/* ============================ FULL REPORT AUDIT (top-to-bottom AI read) ============================ */
+function auditChunk(text){
+  var sys='You are a meticulous credit-report analyst. From this PART of a consumer credit report, extract EVERY account/tradeline, public record, and inquiry you can see — POSITIVE ones too. Return STRICT JSON only: {"accounts":[{"creditor":"","type":"","status":"","date_opened":"YYYY-MM-DD or blank","dofd":"YYYY-MM-DD or blank","date_reported":"YYYY-MM-DD or blank","balance":"digits or blank","bureau":"equifax|experian|transunion or blank","category":"collection|chargeoff|account_late|repossession|public_record|inquiry|positive|other","negative":true}]}. Set negative=false for accounts in good standing/paid as agreed. Do NOT invent anything; only what appears. If none here, return {"accounts":[]}.';
+  var body={model:(localStorage.getItem('crt_ai_model')||'gpt-4o'),temperature:0,response_format:{type:'json_object'},messages:[{role:'system',content:sys},{role:'user',content:text}]};
+  return fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey()},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(j){if(j.error)throw new Error(j.error.message);var c=j.choices&&j.choices[0]&&j.choices[0].message.content;var d=JSON.parse(c||'{}');return d.accounts||[];});
+}
+function auditAnalyze(accounts){
+  var seen={},acc=[];accounts.forEach(function(a){var k=((a.creditor||'')+'|'+(a.date_opened||'')+'|'+(a.bureau||'')).toLowerCase();if(!seen[k]){seen[k]=1;acc.push(a);}});
+  var yr=(new Date()).getFullYear();
+  function ageY(a){var ds=[a.dofd,a.date_opened,a.date_reported].filter(Boolean).map(function(d){return parseInt((''+d).slice(0,4),10)||9999;}).sort(function(x,y){return x-y;});return ds.length?yr-ds[0]:null;}
+  var older7=acc.filter(function(a){var g=ageY(a);return g!=null&&g>=7;});
+  return {total:acc.length,negatives:acc.filter(function(a){return a.negative;}).length,positives:acc.filter(function(a){return !a.negative&&a.category!=='inquiry';}).length,inquiries:acc.filter(function(a){return a.category==='inquiry';}).length,publicrecords:acc.filter(function(a){return a.category==='public_record';}).length,older7:older7.length,older7list:older7.map(function(a){return (a.creditor||'?')+' — '+(a.dofd||a.date_opened||a.date_reported||'?');}),accounts:acc};
+}
+function fullAudit(){
+  if(!aiKey()){toast(LX('Add your OpenAI key first (Negative Items tab).','Agrega tu clave de OpenAI primero (pestaña Ítems negativos).'));go('items');return;}
+  var reps=person().reports||[];
+  if(!reps.length){toast(LX('Upload your report PDF first so I can read it.','Sube tu reporte PDF primero para poder leerlo.'));go('items');return;}
+  var all=reps.map(function(r){return '=== '+(r.bureau||r.name)+' ===\n'+r.text;}).join('\n\n');
+  var chunks=[];for(var i=0;i<all.length;i+=46000)chunks.push(all.slice(i,i+46000));
+  var p=document.getElementById('lazPanel');if(p)p.classList.add('open');
+  if(!lazMsgs.length)lazGreet();
+  lazPush('assistant',LX('📖 Reading your full report top to bottom — '+chunks.length+' section(s). One moment…','📖 Leyendo tu reporte completo de arriba a abajo — '+chunks.length+' sección(es). Un momento…'));lazRender(true);
+  var accounts=[];
+  var seq=chunks.reduce(function(pr,ch){return pr.then(function(){return auditChunk(ch).then(function(arr){accounts=accounts.concat(arr||[]);}).catch(function(){});});},Promise.resolve());
+  return seq.then(function(){
+    var a=auditAnalyze(accounts);
+    person().reportAccounts=a.accounts;person().reportAnalysis={total:a.total,negatives:a.negatives,positives:a.positives,inquiries:a.inquiries,publicrecords:a.publicrecords,older7:a.older7,older7list:a.older7list};save();
+    var body=LX('✅ Done — I read your whole report end to end.','✅ Listo — leí tu reporte completo de principio a fin.')+'\n\n'
+      +'• '+LX('Accounts & records found','Cuentas y registros encontrados')+': '+a.total+'\n'
+      +'• '+LX('Negative items','Ítems negativos')+': '+a.negatives+'\n'
+      +'• '+LX('Public records','Registros públicos')+': '+a.publicrecords+'\n'
+      +'• '+LX('Hard inquiries','Consultas duras')+': '+a.inquiries+'\n'
+      +'• '+LX('Items 7+ years old','Ítems de 7+ años')+': '+a.older7+(a.older7?'\n   - '+a.older7list.slice(0,15).join('\n   - '):'')+'\n\n'
+      +LX('Ask me anything about it.','Pregúntame lo que quieras sobre él.');
+    lazPush('assistant',body);lazRender();
+  }).catch(function(e){lazPush('assistant',LX('Audit hit an error: ','La revisión tuvo un error: ')+(e&&e.message||e));lazRender();});
+}
+
 /* ============================ PEOPLE ============================ */
 function renderPersonSel(){var sel=document.getElementById('personSel');if(!sel)return;sel.innerHTML=DATA.people.map(function(p){return'<option value="'+p.id+'">'+esc(p.label)+'</option>';}).join('');sel.value=DATA.activePersonId;}
 function switchPerson(id){DATA.activePersonId=id;save();refreshAll();go('info');toast('Now editing: '+person().label);}
@@ -1444,13 +1484,15 @@ var lazMsgs=[];
 var LAZ_TOOLS=[
   {type:'function',function:{name:'list_items',description:'List the user current tracked negative items with id, creditor, type, bureaus, amount, date_opened, dofd (date of first delinquency), status, and recommended next letter. Use for counts and ages of the tracked items.',parameters:{type:'object',properties:{}}}},
   {type:'function',function:{name:'search_report',description:'Search the user\'s FULL uploaded credit report text for ANY detail not in the item list — exact dates, "date reported", date of first delinquency, positive accounts, hard inquiries, addresses, employers, or a specific year. Returns matching excerpts. ALWAYS use this before telling the user you do not know something about their report.',parameters:{type:'object',properties:{query:{type:'string',description:'keywords, e.g. a creditor name, "first delinquency", "date opened", "inquiry", or a year like 2017'}},required:['query']}}},
+  {type:'function',function:{name:'run_full_audit',description:'Read the user\'s ENTIRE uploaded report top to bottom (every account, positive and negative, all dates) and produce a complete analysis. Use when the user asks you to read/scan/analyze the whole report or wants a complete/accurate count.',parameters:{type:'object',properties:{}}}},
+  {type:'function',function:{name:'report_analysis',description:'Return results of the last full-report audit: totals, negatives, public records, inquiries, and items 7+ years old. Returns not_run if no audit has been done.',parameters:{type:'object',properties:{}}}},
   {type:'function',function:{name:'generate_round_one',description:'Generate ALL recommended Round-1 dispute letters for every disputable item (one per bureau), opening them ready to print. Use when the user says to do their next step or start.',parameters:{type:'object',properties:{}}}},
   {type:'function',function:{name:'generate_letter',description:'Generate and open ONE specific letter for ONE item. Pass the item_id (from list_items). If letter_id is omitted the recommended one is used.',parameters:{type:'object',properties:{item_id:{type:'string'},letter_id:{type:'string'}},required:['item_id']}}},
   {type:'function',function:{name:'open_tab',description:'Switch the app to a tab so the user can see it.',parameters:{type:'object',properties:{tab:{type:'string',enum:['start','info','items','overview','strategy','letters','tracker','learn','resources']}},required:['tab']}}},
   {type:'function',function:{name:'documents_for',description:'Return exactly which documents/proof the user should enclose with the dispute for a given item id.',parameters:{type:'object',properties:{item_id:{type:'string'}},required:['item_id']}}}
 ];
 function lazLettersBrief(){return Object.keys(LETTERS).map(function(id){return id+' = '+LETTERS[id].name+' ('+LETTERS[id].when+')';}).join('\n');}
-function lazSituation(){var p=P(),its=person().items||[];var lines=its.map(function(it){var f=auditItem(it).map(function(x){return x.tag;});return '- ['+it.id+'] '+(it.creditor||'?')+' · '+CATLABEL[it.category]+' · '+((it.bureaus||[]).join('/')||'?')+(it.amount?' · $'+it.amount:'')+(f.length?' · flags: '+f.join(', '):'');});var sc=its.length?estimateScore(its):null;return 'Profile name: '+(p.fullName||'(not entered yet)')+'\nActive person: '+person().label+'\nNegative items ('+its.length+'):\n'+(lines.join('\n')||'  (none yet — guide them to import their reports)')+'\nLetters logged so far: '+(person().letters.length)+(sc?'\nEstimated score now ~'+sc.current+', potential after cleanup ~'+sc.projected:'');}
+function lazSituation(){var p=P(),its=person().items||[];var lines=its.map(function(it){var f=auditItem(it).map(function(x){return x.tag;});return '- ['+it.id+'] '+(it.creditor||'?')+' · '+CATLABEL[it.category]+' · '+((it.bureaus||[]).join('/')||'?')+(it.amount?' · $'+it.amount:'')+(f.length?' · flags: '+f.join(', '):'');});var sc=its.length?estimateScore(its):null;return 'Profile name: '+(p.fullName||'(not entered yet)')+'\nActive person: '+person().label+'\nNegative items ('+its.length+'):\n'+(lines.join('\n')||'  (none yet — guide them to import their reports)')+'\nLetters logged so far: '+(person().letters.length)+(sc?'\nEstimated score now ~'+sc.current+', potential after cleanup ~'+sc.projected:'')+(person().reportAnalysis?'\nFULL-AUDIT RESULTS (entire report read): '+JSON.stringify(person().reportAnalysis):'');}
 function lazSystem(){
   return 'You are "Laz", a sharp, confident, motivating credit-repair coach built into a free self-help app. Personality: encouraging, a little swagger, plain-spoken, never condescending — a coach in the user corner. You help people fix their OWN credit legally using the FCRA and FDCPA.\n'
   +'RULES: Keep replies short and actionable (2-6 sentences or tight bullets). Be accurate. NEVER suggest disputing information the user knows is accurate, using a CPN/fake SSN, "new credit identity", or anything illegal — explain why and offer the legal route (goodwill, validation, negotiation) instead. The dispute LETTERS are always written in English because U.S. bureaus require it, even when you chat in Spanish.\n'
@@ -1468,6 +1510,8 @@ function lazTool(name,args){
     if((name==='generate_round_one'||name==='generate_letter')&&profileMissing().length){return JSON.stringify({error:'profile_incomplete',missing:profileMissing(),instruction:'Do NOT say letters were generated. In the user\'s language, tell them to open the My Info tab and fill their full name and mailing address first (and SSN last-4), then ask you again. Offer to walk them through it.'});}
     if(name==='list_items')return JSON.stringify((person().items||[]).map(function(it){return {id:it.id,creditor:it.creditor,type:it.category,bureaus:it.bureaus,amount:it.amount,date_opened:it.dateOpened||'',dofd:it.dofd||'',status:it.status||'',recommended_next:(nextMoves(it)[0]||{}).id,rounds_sent:itemHistory(it).count};}));
     if(name==='search_report')return searchReports(args.query);
+    if(name==='run_full_audit'){fullAudit();return JSON.stringify({started:true,note:'Reading the whole report now; the complete breakdown will appear in chat in a few seconds.'});}
+    if(name==='report_analysis')return JSON.stringify(person().reportAnalysis||{not_run:true,note:'No full audit yet — call run_full_audit.'});
     if(name==='documents_for'){var di=(person().items||[]).find(function(x){return x.id===args.item_id;});return JSON.stringify({documents:docsFor(di)});}
     if(name==='generate_round_one'){var n=generateRound1();return JSON.stringify({generated_letters:n,note:n?'Letters are open on screen, ready to print.':'No bureau-dispute items; use generate_letter for collector/creditor letters.'});}
     if(name==='generate_letter'){var it=(person().items||[]).find(function(x){return x.id===args.item_id;});if(!it)return JSON.stringify({error:'no item with that id; call list_items first'});var lid=args.letter_id||(recommendFor(it)[0]||{}).id||'bureau_dispute';if(!LETTERS[lid])lid='bureau_dispute';quickGen(it.id,lid);return JSON.stringify({opened:lid,name:LETTERS[lid].name,for:it.creditor});}
@@ -1597,6 +1641,8 @@ var ES={
 'total':'total','drafted':'borradores','printed':'impresas','mailed':'enviadas','resolved':'resueltas',
 'Drafted':'Borrador','Printed':'Impresa','Response received':'Respuesta recibida','Resolved — deleted':'Resuelto — eliminado','Resolved — corrected':'Resuelto — corregido','Verified (escalate)':'Verificado (escalar)','No response (escalate)':'Sin respuesta (escalar)',
 '🖨 Mark printed → Tracker':'🖨 Marcar impresa → Seguimiento','AI model':'Modelo de IA','GPT-4o — best (recommended)':'GPT-4o — el mejor (recomendado)','GPT-4o mini — cheaper/faster':'GPT-4o mini — más barato/rápido',
+'📖 Full report audit — read top to bottom':'📖 Auditoría completa — leer de arriba a abajo',
+'Reads your whole uploaded report end-to-end and gives a complete breakdown (totals, items 7+ years old, inquiries…). Results appear in the Laz chat.':'Lee tu reporte completo de principio a fin y da un desglose total (totales, ítems de 7+ años, consultas…). Los resultados aparecen en el chat de Laz.',
 /* learn */
 'Know Your Rights':'Conoce tus derechos','The laws that make all of this work — in plain English. Citing them correctly is what gets results.':'Las leyes que hacen que todo esto funcione — en lenguaje sencillo. Citarlas bien es lo que da resultados.',
 'The two laws on your side':'Las dos leyes de tu lado','Key FCRA sections you\'ll cite':'Secciones clave de la FCRA que citarás','Key FDCPA tools':'Herramientas clave de la FDCPA','How long do negative items last?':'¿Cuánto duran los ítems negativos?','Medical debt — the 2026 reality':'Deuda médica — la realidad en 2026','Dispute reasons that actually work (cheat sheet)':'Razones de disputa que sí funcionan (guía rápida)','Smart habits that build score while you dispute':'Hábitos inteligentes que suben tu puntaje mientras disputas',
