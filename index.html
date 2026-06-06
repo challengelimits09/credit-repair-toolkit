@@ -561,7 +561,7 @@
       <button class="btn ghost sm" onclick="copyLetter()">📋 Copy</button>
       <button class="btn ghost sm" onclick="downloadLetter()">⬇ Download .txt</button>
       <button class="btn alt sm" onclick="printLetter()">🖨 Print / Save PDF</button>
-      <button class="btn sm" onclick="saveToTracker()">✅ Save to Tracker</button>
+      <button class="btn sm" onclick="markPrinted()">🖨 Mark printed → Tracker</button>
     </div>
   </div>
 </div>
@@ -1018,7 +1018,11 @@ function buildAndShow(letterId,c,itemForName){
   }else{
     text=L.build(c);
   }
-  currentLetter={id:letterId,text:text,meta:{recipient:L.recipient,bureau:c.bureau,item:c.item||itemForName||null,deadlineDays:L.deadlineDays,name:L.name}};
+  var it=c.item||itemForName||null;
+  if(L.recipient==='bureau'&&c.bureau==='all'){var lg=(it&&it.bureaus&&it.bureaus.length)?it.bureaus:BKEYS;lg.forEach(function(b){logGenerated(L.name,BUREAUS[b].name,itemRefOf(it),b,L.deadlineDays);});}
+  else{var rl=L.recipient==='bureau'?(BUREAUS[c.bureau]?BUREAUS[c.bureau].name:c.bureau):(L.recipient.charAt(0).toUpperCase()+L.recipient.slice(1));logGenerated(L.name,rl,itemRefOf(it),(L.recipient==='bureau'?(c.bureau||''):''),L.deadlineDays);}
+  save();renderStats();
+  currentLetter={id:letterId,text:text,meta:{recipient:L.recipient,bureau:c.bureau,item:it,deadlineDays:L.deadlineDays,name:L.name}};
   openModal(L,text);
 }
 function openModal(L,text){
@@ -1051,6 +1055,21 @@ function printLetter(){
 }
 
 /* ============================ TRACKER ============================ */
+/* Auto-remember every generated letter so nothing is lost */
+function logGenerated(name,recipient,itemRef,bureau,deadlineDays){
+  var key=itemRef+'|'+name+'|'+(bureau||'');
+  var dup=(person().letters||[]).some(function(e){return (e.itemRef+'|'+e.name+'|'+(e.bureau||''))===key && ['Drafted','Printed','Sent','Response received'].indexOf(e.status)>=0;});
+  if(dup)return false;
+  var round=1;person().letters.forEach(function(e){if(e.itemRef===itemRef)round++;});
+  person().letters.push({id:uid(),name:name,recipient:recipient,itemRef:itemRef,bureau:bureau||'',dateSent:'',deadlineDays:deadlineDays||30,method:'',tracking:'',round:round,status:'Drafted',outcome:''});
+  return true;
+}
+/* Modal action: mark the letter(s) you just generated as printed */
+function markPrinted(){
+  var m=currentLetter.meta,ref=m.item?itemRefOf(m.item):null,changed=0;
+  (person().letters||[]).forEach(function(e){if(e.status!=='Drafted')return;if(ref){if(e.itemRef===ref){e.status='Printed';changed++;}}else{e.status='Printed';changed++;}});
+  save();renderTracker();renderStats();toast(LX('Marked '+changed+' letter(s) as printed','Marcadas '+changed+' carta(s) como impresas'));closeModal();go('tracker');
+}
 function saveToTracker(){
   var m=currentLetter.meta;
   var itemRef=m.item?(m.item.creditor+(m.item.account?' · '+m.item.account:'')):'—';
@@ -1059,12 +1078,17 @@ function saveToTracker(){
   var entry={id:uid(),name:m.name,recipient:recip,itemRef:itemRef,dateSent:todayISO(),deadlineDays:m.deadlineDays||30,method:'',tracking:'',round:round,status:'Sent',outcome:''};
   person().letters.push(entry);save();toast('Saved to Tracker');closeModal();go('tracker');
 }
-var STATUSES=['Drafted','Sent','Response received','Resolved — deleted','Resolved — corrected','Verified (escalate)','No response (escalate)'];
+var STATUSES=['Drafted','Printed','Sent','Response received','Resolved — deleted','Resolved — corrected','Verified (escalate)','No response (escalate)'];
 function renderTracker(){
   var wrap=document.getElementById('trackerTable');
-  if(person().letters.length===0){wrap.innerHTML='<div class="empty">No letters yet. Generate one and click "Save to Tracker."</div>';return;}
+  var LL=person().letters;
+  if(LL.length===0){wrap.innerHTML='<div class="empty">No letters yet. Every letter you generate is recorded here automatically — then mark each one Printed and Mailed.</div>';return;}
+  var cc={drafted:0,printed:0,sent:0,resolved:0};
+  LL.forEach(function(e){if(e.status==='Drafted')cc.drafted++;else if(e.status==='Printed')cc.printed++;else if(e.status==='Sent'||e.status==='Response received')cc.sent++;else if(/Resolved/.test(e.status))cc.resolved++;});
+  var pill=function(n,lab){return '<div style="background:var(--chip);border-radius:10px;padding:8px 16px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--teal-d)">'+n+'</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">'+lab+'</div></div>';};
+  var summary='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">'+pill(LL.length,'total')+pill(cc.drafted,'drafted')+pill(cc.printed,'printed')+pill(cc.sent,'mailed')+pill(cc.resolved,'resolved')+'</div>';
   var rows=person().letters.slice().sort(function(a,b){return(b.dateSent||'').localeCompare(a.dateSent||'');});
-  var html='<table><tr><th>Sent</th><th>Letter</th><th>To</th><th>Re</th><th>Rnd</th><th>Tracking #</th><th>Deadline</th><th>Status</th><th></th></tr>';
+  var html=summary+'<table><tr><th>Date</th><th>Letter</th><th>To</th><th>Re</th><th>Rnd</th><th>Tracking #</th><th>Deadline</th><th>Status</th><th></th></tr>';
   rows.forEach(function(e){
     var dl='';var badge='';
     if(e.deadlineDays>0&&e.dateSent&&['Sent','Response received'].indexOf(e.status)>=0){
@@ -1244,9 +1268,10 @@ function generateRound1(){
     var steps=recommendFor(it),step=null;
     for(var i=0;i<steps.length;i++){if(CLEAN.indexOf(steps[i].id)>=0){step=steps[i];break;}}
     if(!step)return;var L=LETTERS[step.id];var bs=(it.bureaus&&it.bureaus.length)?it.bureaus:BKEYS;
-    bs.forEach(function(b){parts.push(L.build({item:it,bureau:b,reason:defaultReason(it)}));n++;});
+    bs.forEach(function(b){parts.push(L.build({item:it,bureau:b,reason:defaultReason(it)}));n++;logGenerated(L.name,(BUREAUS[b]?BUREAUS[b].name:b),itemRefOf(it),b,L.deadlineDays);});
   });
   if(!n){toast('These items use collector/creditor letters — generate those from the table.');return 0;}
+  save();renderStats();
   var pseudo={name:'Round 1 — '+n+' bureau letter(s)',cat:'Bureau',recipient:'bureau',needs:[]};
   currentLetter={id:'round1',text:parts.join(PB),meta:{recipient:'bureau',bureau:'all',item:null,deadlineDays:30,name:pseudo.name}};
   openModal(pseudo,parts.join(PB));
@@ -1552,7 +1577,10 @@ var ES={
 'Letter Tracker &amp; Deadlines':'Seguimiento de cartas y fechas límite',
 'Every letter you save lands here. The toolkit calculates the response deadline and flags what\'s overdue so nothing slips.':'Cada carta que guardas aparece aquí. La herramienta calcula la fecha límite de respuesta y marca lo vencido para que nada se te pase.',
 'Sent &amp; pending letters':'Cartas enviadas y pendientes','+ Generate a new letter':'+ Generar una carta nueva',
-'Sent':'Enviada','Letter':'Carta','To':'Para','Re':'Ref','Rnd':'Ronda','Tracking #':'N.º de rastreo','Deadline':'Fecha límite','Status':'Estado',
+'Sent':'Enviada','Letter':'Carta','To':'Para','Re':'Ref','Rnd':'Ronda','Tracking #':'N.º de rastreo','Deadline':'Fecha límite','Status':'Estado','Date':'Fecha',
+'total':'total','drafted':'borradores','printed':'impresas','mailed':'enviadas','resolved':'resueltas',
+'Drafted':'Borrador','Printed':'Impresa','Response received':'Respuesta recibida','Resolved — deleted':'Resuelto — eliminado','Resolved — corrected':'Resuelto — corregido','Verified (escalate)':'Verificado (escalar)','No response (escalate)':'Sin respuesta (escalar)',
+'🖨 Mark printed → Tracker':'🖨 Marcar impresa → Seguimiento','AI model':'Modelo de IA','GPT-4o — best (recommended)':'GPT-4o — el mejor (recomendado)','GPT-4o mini — cheaper/faster':'GPT-4o mini — más barato/rápido',
 /* learn */
 'Know Your Rights':'Conoce tus derechos','The laws that make all of this work — in plain English. Citing them correctly is what gets results.':'Las leyes que hacen que todo esto funcione — en lenguaje sencillo. Citarlas bien es lo que da resultados.',
 'The two laws on your side':'Las dos leyes de tu lado','Key FCRA sections you\'ll cite':'Secciones clave de la FCRA que citarás','Key FDCPA tools':'Herramientas clave de la FDCPA','How long do negative items last?':'¿Cuánto duran los ítems negativos?','Medical debt — the 2026 reality':'Deuda médica — la realidad en 2026','Dispute reasons that actually work (cheat sheet)':'Razones de disputa que sí funcionan (guía rápida)','Smart habits that build score while you dispute':'Hábitos inteligentes que suben tu puntaje mientras disputas',
