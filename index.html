@@ -1124,7 +1124,7 @@ function nextStepHint(e){
   if(e.deadlineDays>0&&e.dateSent&&['Sent','Response received'].indexOf(e.status)>=0){var due=addDaysISO(e.dateSent,e.deadlineDays);if(daysBetween(todayISO(),due)<0)return'Deadline passed. If you never got a real result, escalate now (demand deletion / CFPB complaint).';}
   return'';
 }
-function updLetter(id,field,val){var e=person().letters.find(function(x){return x.id===id;});if(!e)return;e[field]=val;save();renderTracker();renderStats();}
+function updLetter(id,field,val){var e=person().letters.find(function(x){return x.id===id;});if(!e)return;e[field]=val;save();renderTracker();renderOverview();renderStats();}
 function delLetter(id){if(!confirm('Remove this letter from the tracker?'))return;person().letters=person().letters.filter(function(x){return x.id!==id;});save();renderTracker();renderStats();}
 
 /* ============================ STATS ============================ */
