@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Credit Repair Toolkit — Private &amp; Local</title>
+<style>
+  :root{
+    --navy:#0f2a43; --navy2:#16395c; --teal:#1f8a8a; --teal-d:#156b6b;
+    --bg:#eef2f6; --card:#ffffff; --ink:#14202b; --muted:#5b6b7a;
+    --line:#dde5ec; --good:#1f8a4d; --warn:#b6791f; --bad:#c0392b;
+    --chip:#eaf3f3; --shadow:0 1px 3px rgba(16,40,64,.08),0 6px 24px rgba(16,40,64,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.5;font-size:15px}
+  header.app{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 22px;
+    position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+  .app-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;max-width:1100px;margin:0 auto}
+  .logo{font-weight:800;font-size:20px;letter-spacing:.2px}
+  .logo small{display:block;font-weight:500;font-size:12px;opacity:.85;letter-spacing:.3px}
+  .privacy-badge{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
+    padding:6px 11px;border-radius:999px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+  .spacer{flex:1}
+  .hbtn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);
+    padding:7px 12px;border-radius:8px;font-size:13px;cursor:pointer}
+  .hbtn:hover{background:rgba(255,255,255,.22)}
+  .person-bar{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);padding:5px 8px;border-radius:10px;flex-wrap:wrap}
+  .person-bar label{margin:0;color:#fff;font-size:12px;font-weight:800;white-space:nowrap}
+  .person-bar select{padding:6px 8px;border-radius:7px;border:none;font-size:13px;font-weight:700;min-width:130px;color:var(--ink);background:#fff}
+  nav.tabs{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:70px;z-index:40;
+    overflow-x:auto;white-space:nowrap}
+  nav.tabs .inner{max-width:1100px;margin:0 auto;display:flex;gap:2px;padding:0 12px}
+  .tab{padding:13px 15px;cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;
+    border-bottom:3px solid transparent}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--teal-d);border-bottom-color:var(--teal)}
+  main{max-width:1100px;margin:0 auto;padding:22px 16px 80px}
+  section.view{display:none;animation:fade .2s ease}
+  section.view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  h1{font-size:24px;margin:0 0 4px}
+  h2{font-size:19px;margin:26px 0 10px}
+  h3{font-size:16px;margin:18px 0 8px}
+  p.sub{color:var(--muted);margin:0 0 18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;
+    box-shadow:var(--shadow);margin-bottom:18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+  label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:0 0 5px}
+  input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;
+    font-size:14px;font-family:inherit;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(31,138,138,.12)}
+  textarea{resize:vertical;min-height:90px}
+  .field{margin-bottom:14px}
+  .btn{background:var(--teal);color:#fff;border:none;padding:11px 18px;border-radius:9px;font-weight:700;
+    font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+  .btn:hover{background:var(--teal-d)}
+  .btn.alt{background:var(--navy)}
+  .btn.alt:hover{background:var(--navy2)}
+  .btn.ghost{background:#fff;color:var(--teal-d);border:1.5px solid var(--teal)}
+  .btn.ghost:hover{background:var(--chip)}
+  .btn.sm{padding:7px 12px;font-size:13px;border-radius:8px}
+  .btn.danger{background:#fff;color:var(--bad);border:1.5px solid var(--bad)}
+  .btn.danger:hover{background:#fdecea}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+  .pill.eq{background:#fde9e0;color:#9a4516}
+  .pill.ex{background:#e2effa;color:#1d5a8a}
+  .pill.tu{background:#e7f2ec;color:#1f7a47}
+  .pill.gray{background:#eef2f6;color:#5b6b7a}
+  .pill.good{background:#e6f4ec;color:var(--good)}
+  .pill.warn{background:#fbf1df;color:var(--warn)}
+  .pill.bad{background:#fdecea;color:var(--bad)}
+  .note{background:#f4f8fb;border-left:4px solid var(--teal);padding:12px 14px;border-radius:0 8px 8px 0;
+    font-size:13.5px;color:#374a5a;margin:12px 0}
+  .note.warn{background:#fbf4e6;border-left-color:var(--warn)}
+  .note.bad{background:#fdeeec;border-left-color:var(--bad)}
+  .note.good{background:#eaf6ee;border-left-color:var(--good)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+  .row-actions{display:flex;gap:6px;flex-wrap:wrap}
+  ul.clean{padding-left:18px;margin:8px 0}
+  ul.clean li{margin:6px 0}
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+  ol.steps li{counter-increment:s;position:relative;padding:14px 14px 14px 56px;border:1px solid var(--line);
+    border-radius:12px;margin-bottom:12px;background:#fff}
+  ol.steps li::before{content:counter(s);position:absolute;left:14px;top:14px;width:28px;height:28px;
+    background:var(--teal);color:#fff;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px}
+  .empty{text-align:center;color:var(--muted);padding:30px 10px}
+  .badge-cnt{background:var(--teal);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;margin-left:5px}
+  details{border:1px solid var(--line);border-radius:10px;padding:6px 14px;margin-bottom:10px;background:#fff}
+  details summary{cursor:pointer;font-weight:700;padding:8px 0}
+  details[open] summary{border-bottom:1px solid var(--line);margin-bottom:8px}
+  a{color:var(--teal-d)}
+  .kv{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0;font-size:13px}
+  .kv b{color:var(--muted);font-weight:600}
+  .checklist{list-style:none;padding:0;margin:0}
+  .checklist li{padding:8px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:flex-start}
+  .checklist li:last-child{border-bottom:none}
+  .checklist input{width:auto;margin-top:3px}
+  /* Modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,42,67,.55);display:none;z-index:100;
+    align-items:flex-start;justify-content:center;padding:24px;overflow:auto}
+  .modal-bg.open{display:flex}
+  .modal{background:#fff;border-radius:14px;max-width:860px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);
+    margin:auto}
+  .modal-head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .modal-head h3{margin:0;font-size:17px}
+  .modal-body{padding:18px 20px}
+  .modal-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .letter-ta{width:100%;min-height:360px;font-family:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;
+    font-size:12.5px;line-height:1.55;white-space:pre;overflow:auto}
+  .x{margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)}
+  .tag{font-size:11px;background:var(--chip);color:var(--teal-d);padding:3px 8px;border-radius:6px;font-weight:700}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;
+    padding:11px 18px;border-radius:10px;font-size:14px;box-shadow:0 8px 28px rgba(0,0,0,.3);z-index:200;
+    opacity:0;pointer-events:none;transition:opacity .25s}
+  .toast.show{opacity:1}
+  .hero{background:linear-gradient(135deg,#143a5c,#1f8a8a);color:#fff;border-radius:16px;padding:26px;margin-bottom:20px}
+  .hero h1{font-size:26px}
+  .hero p{opacity:.92;margin:6px 0 0;max-width:680px}
+  .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:10px 0 0}
+  @media(max-width:760px){.stat{grid-template-columns:1fr 1fr}}
+  .stat .s{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .stat .s b{display:block;font-size:26px;color:var(--teal-d)}
+  .stat .s span{font-size:12px;color:var(--muted)}
+  .legal{font-size:12px;color:var(--muted);background:#fff;border:1px dashed var(--line);border-radius:10px;padding:14px;margin-top:18px}
+  /* Print */
+  #printArea{display:none}
+  @media print{
+    body{background:#fff}
+    header.app,nav.tabs,main{display:none !important}
+    #printArea{display:block;font-family:"Times New Roman",Georgia,serif;font-size:12.5pt;line-height:1.5;
+      color:#000;white-space:pre-wrap;padding:0.5in}
+    .pb{page-break-after:always}
+  }
+</style>
+</head>
+<body>
+<header class="app">
+  <div class="app-row">
+    <div class="logo">Credit Repair Toolkit <small>Dispute letters · strategy · tracking — all on your device</small></div>
+    <div class="person-bar">
+      <label for="personSel">👤 Whose credit:</label>
+      <select id="personSel" onchange="switchPerson(this.value)"></select>
+      <button class="hbtn" onclick="addPerson()">+ Add person</button>
+      <button class="hbtn" onclick="renamePerson()">Rename</button>
+      <button class="hbtn" onclick="deletePerson()">Remove</button>
+    </div>
+    <div class="spacer"></div>
+    <span class="privacy-badge">🔒 100% private — saved only in this browser</span>
+    <button class="hbtn" onclick="exportData()">⬇ Backup</button>
+    <button class="hbtn" onclick="document.getElementById('importFile').click()">⬆ Restore</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(event)">
+    <button class="hbtn" onclick="resetAll()">Reset</button>
+  </div>
+</header>
+
+<nav class="tabs"><div class="inner" id="tabbar"></div></nav>
+
+<main>
+  <!-- START -->
+  <section class="view" id="view-start">
+    <div class="hero">
+      <h1>Fix your credit the legal, methodical way.</h1>
+      <p>This toolkit helps you do exactly what paid credit-repair companies do — for free — by exercising your own rights under the Fair Credit Reporting Act (FCRA) and the Fair Debt Collection Practices Act (FDCPA). Enter your information once, list what's on your reports, and the toolkit builds the right letters, in the right order, and tracks every deadline.</p>
+    </div>
+
+    <div class="stat">
+      <div class="s"><b id="st-items">0</b><span>negative items logged</span></div>
+      <div class="s"><b id="st-letters">0</b><span>letters in tracker</span></div>
+      <div class="s"><b id="st-open">0</b><span>awaiting response</span></div>
+      <div class="s"><b id="st-due">0</b><span>overdue / escalate</span></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:6px">Your 7-step game plan</h2>
+      <ol class="steps">
+        <li><b>Pull all three reports (free, weekly).</b> Get Equifax, Experian &amp; TransUnion from <a href="https://www.annualcreditreport.com" target="_blank">AnnualCreditReport.com</a> — the only federally authorized free source. Reports are now free every week. (See <a href="#" onclick="go('resources');return false">Resources</a>.)</li>
+        <li><b>Lock things down.</b> Freeze your credit at all three bureaus and opt out of prescreened offers — stops new fraud and junk inquiries while you work.</li>
+        <li><b>Enter your info &amp; list every negative item.</b> Go to <a href="#" onclick="go('info');return false">My Info</a>, then <a href="#" onclick="go('items');return false">Negative Items</a>. Add collections, charge-offs, late payments, wrong personal info, and unauthorized inquiries.</li>
+        <li><b>Get your strategy.</b> The <a href="#" onclick="go('strategy');return false">Strategy</a> tab tells you exactly which letters to send for each item and in what order.</li>
+        <li><b>Generate &amp; mail the letters.</b> The <a href="#" onclick="go('letters');return false">Letters</a> tab fills out 16 different professional letters with your details. <b>Always send by certified mail with return receipt.</b></li>
+        <li><b>Track the clock.</b> Bureaus get 30 days to investigate. Log each letter in the <a href="#" onclick="go('tracker');return false">Tracker</a>; it calculates deadlines and tells you the next move.</li>
+        <li><b>Escalate.</b> No response or a bogus "verified"? Send a Method-of-Verification demand, dispute with the furnisher directly, and file a CFPB complaint.</li>
+      </ol>
+    </div>
+
+    <div class="grid2">
+      <div class="card note good" style="margin-bottom:0">
+        <h3 style="margin-top:0">✅ What you CAN legally remove</h3>
+        <ul class="clean">
+          <li>Information that is <b>inaccurate</b> (wrong balance, wrong dates, "late" when you paid on time)</li>
+          <li>Information that is <b>incomplete or unverifiable</b> — if the furnisher can't prove it, it must be deleted</li>
+          <li>Accounts that <b>aren't yours</b> or resulted from identity theft</li>
+          <li><b>Obsolete</b> items past the 7-year (or 10-year for Ch. 7 bankruptcy) limit</li>
+          <li><b>Unauthorized hard inquiries</b> you never approved</li>
+          <li>Accurate late payments — via a <b>goodwill request</b> (the creditor's discretion)</li>
+        </ul>
+      </div>
+      <div class="card note bad" style="margin-bottom:0">
+        <h3 style="margin-top:0">⛔ What this toolkit will NOT do (it's illegal)</h3>
+        <ul class="clean">
+          <li><b>Disputing accurate information</b> with false statements — that's fraud.</li>
+          <li><b>CPNs / "credit privacy numbers"</b> as SSN substitutes — federal identity fraud.</li>
+          <li>Creating a "new credit identity" or "file segregation."</li>
+          <li>Promising a guaranteed score jump — no one can.</li>
+        </ul>
+        <p style="margin:8px 0 0;font-size:13px">Only dispute items you genuinely believe are inaccurate, incomplete, outdated, or unverifiable. That's both the legal path and the effective one.</p>
+      </div>
+    </div>
+
+    <div class="legal">
+      <b>Disclaimer.</b> This is a free, self-help educational tool that you operate yourself. It is <b>not</b> a credit-repair organization, law firm, or financial advisor, and it does not provide legal advice. It charges nothing and asks for no payment. Results are never guaranteed. The legal citations are provided for your reference; statutes and bureau addresses change — verify current details (see Resources) before mailing. For complex situations (lawsuits, bankruptcy, large identity theft), consult a consumer-protection attorney — many take FCRA/FDCPA cases at no cost to you because the law shifts fees to violators.
+    </div>
+  </section>
+
+  <!-- MY INFO -->
+  <section class="view" id="view-info">
+    <h1>My Information <span id="whoLabel" class="pill" style="background:var(--chip);color:var(--teal-d);font-size:14px;vertical-align:middle"></span></h1>
+    <p class="sub">Entered once, then auto-filled into every letter for <b>this person only</b>. Use the <b>"Whose credit"</b> menu at the top to switch between people (e.g., you and your wife). Stored only in this browser on this device — nothing is uploaded anywhere.</p>
+    <div class="note warn">For the SSN, the toolkit uses only the <b>last 4 digits</b> in letters by default (this is standard and safer). When you actually mail a dispute, enclose a photocopy of your ID and a utility bill — never email these.</div>
+    <div class="card">
+      <div class="grid2">
+        <div class="field"><label>Full legal name *</label><input id="p_fullName" placeholder="Jane A. Doe"></div>
+        <div class="field"><label>Former names / maiden name (if any)</label><input id="p_formerNames" placeholder="Jane Smith"></div>
+        <div class="field"><label>Date of birth</label><input id="p_dob" type="date"></div>
+        <div class="field"><label>SSN — last 4 digits</label><input id="p_ssnLast4" maxlength="4" inputmode="numeric" placeholder="1234"></div>
+      </div>
+      <h3>Current mailing address</h3>
+      <div class="field"><label>Street address *</label><input id="p_address1" placeholder="123 Main St"></div>
+      <div class="grid3">
+        <div class="field"><label>Apt / Unit</label><input id="p_address2" placeholder="Apt 4B"></div>
+        <div class="field"><label>City *</label><input id="p_city" placeholder="Fort Myers"></div>
+        <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label>State *</label><input id="p_state" placeholder="FL" maxlength="2"></div>
+          <div><label>ZIP *</label><input id="p_zip" placeholder="33901"></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Phone</label><input id="p_phone" placeholder="(239) 555-0100"></div>
+        <div class="field"><label>Email</label><input id="p_email" placeholder="you@email.com"></div>
+      </div>
+      <div class="field"><label>Previous addresses (last 2 years) — helps fix "mixed file" errors</label><textarea id="p_formerAddresses" placeholder="One per line"></textarea></div>
+      <button class="btn" onclick="saveProfile()">💾 Save my information</button>
+      <span id="profileSaved" class="pill good" style="display:none;margin-left:10px">Saved ✓</span>
+    </div>
+  </section>
+
+  <!-- ITEMS -->
+  <section class="view" id="view-items">
+    <h1>Negative Items</h1>
+    <p class="sub">List everything questionable on your reports. Be precise — the account number and dates as shown on the report make your disputes stronger.</p>
+
+    <div class="card" style="border:2px solid var(--navy);background:#f6f9fc">
+      <h3 style="margin-top:0">⚡ Fastest: upload your report PDF(s) — AI fills in everything</h3>
+      <p style="margin-top:0">Drop in your downloaded report PDF(s) and AI reads them and auto-creates your items (creditor, balance, dates, status, and which bureau). Your <b>SSN is stripped out before anything is sent</b>, and your API key is saved only on this device.</p>
+      <div class="grid2">
+        <div class="field"><label>OpenAI API key <span style="font-weight:400">(saved on this device only)</span></label><input id="ai_key" type="password" placeholder="sk-..." autocomplete="off"></div>
+        <div class="field"><label>Upload report file(s) — PDF, or TXT/HTML</label><input type="file" id="ai_files" accept=".pdf,.txt,.html,.htm" multiple onchange="aiIngest(event)"></div>
+      </div>
+      <div style="color:var(--muted);font-size:12.5px">Tip: you can select all 3 bureau PDFs at once. Cost is about half a cent per report. Don't have a key? Use the free manual options below.</div>
+      <div id="ai_status"></div>
+    </div>
+
+    <div class="card" style="border:2px solid var(--teal)">
+      <h3 style="margin-top:0">① Get your reports — free</h3>
+      <p style="margin-top:0">A private tool can't silently pull your credit (the bureaus make <i>you</i> log in and verify your identity — there's no free auto-pull). But this is the fast, free, official way, and the next step does the heavy lifting for you.</p>
+      <button class="btn" onclick="window.open('https://www.annualcreditreport.com/','_blank')">🔗 Open AnnualCreditReport.com — all 3 bureaus, free weekly</button>
+      <div class="note" style="margin-bottom:0">After you verify your identity: <b>download/save each report</b> (PDF or print), or select-all and <b>copy the text</b>. Then paste it in step ② below and the app finds the bad items automatically. <br><span style="color:var(--muted);font-size:12.5px">Tip: Credit Karma (free) and your bank's credit tool also show items you can paste here.</span></div>
+    </div>
+
+    <details class="card" style="border:2px solid var(--teal)" open>
+      <summary style="font-size:16px">② Import without AI — paste report text (free, less accurate)</summary>
+      <div style="margin-top:10px">
+        <div class="grid2">
+          <div class="field"><label>This report is from</label>
+            <select id="imp_bureau">
+              <option value="all">All three (or not sure)</option>
+              <option value="equifax">Equifax</option>
+              <option value="experian">Experian</option>
+              <option value="transunion">TransUnion</option>
+            </select>
+          </div>
+          <div class="field"><label>Or upload a saved report file (.txt, .html, .csv)</label>
+            <input type="file" id="imp_file" accept=".txt,.csv,.html,.htm" onchange="importReportFile(event)">
+          </div>
+        </div>
+        <div class="field"><label>Paste your full credit report text here</label>
+          <textarea id="imp_text" style="min-height:140px" placeholder="Paste the whole report (Ctrl/Cmd+A to select all on the page, then copy). The more you paste, the more it finds."></textarea>
+        </div>
+        <button class="btn alt" onclick="scanReport()">🔎 Scan for negative items</button>
+        <div class="note warn" style="margin-bottom:0">PDF report? Open it, select-all, copy, and paste above. Nothing you paste ever leaves this device. Always double-check what it finds before adding.</div>
+        <div id="imp_results" style="margin-top:14px"></div>
+      </div>
+    </details>
+
+    <div class="card">
+      <h3 style="margin-top:0" id="itemFormTitle">Add an item</h3>
+      <input type="hidden" id="i_id">
+      <div class="grid2">
+        <div class="field"><label>Creditor / furnisher / collector name *</label><input id="i_creditor" placeholder="Midland Credit Mgmt / Capital One"></div>
+        <div class="field"><label>Account number (as shown on report)</label><input id="i_account" placeholder="****1234"></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label>Item type *</label>
+          <select id="i_category">
+            <option value="collection">Collection account</option>
+            <option value="chargeoff">Charge-off</option>
+            <option value="account_late">Account with late payments</option>
+            <option value="not_mine_fraud">Not mine / identity theft</option>
+            <option value="inquiry">Unauthorized hard inquiry</option>
+            <option value="public_record">Public record (judgment/bankruptcy)</option>
+            <option value="personal_info">Wrong personal info (name/address)</option>
+            <option value="repossession">Repossession</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Is the information accurate? *</label>
+          <select id="i_accuracy">
+            <option value="inaccurate">No — it's inaccurate / not mine</option>
+            <option value="unsure">Not sure / can't verify it</option>
+            <option value="accurate">Yes — it's accurate</option>
+          </select>
+        </div>
+        <div class="field"><label>Amount ($)</label><input id="i_amount" placeholder="842"></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label>Date opened</label><input id="i_dateOpened" type="date"></div>
+        <div class="field"><label>Date of first delinquency (DOFD)</label><input id="i_dofd" type="date"></div>
+        <div class="field"><label>Current status</label><input id="i_status" placeholder="Open / Paid / Unpaid / Closed"></div>
+      </div>
+      <div class="field"><label>Appears on which reports? *</label>
+        <span style="display:inline-flex;gap:16px;align-items:center;font-weight:600;color:var(--ink)">
+          <label style="font-weight:600;display:inline-flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="i_b_equifax" style="width:auto"> Equifax</label>
+          <label style="font-weight:600;display:inline-flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="i_b_experian" style="width:auto"> Experian</label>
+          <label style="font-weight:600;display:inline-flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="i_b_transunion" style="width:auto"> TransUnion</label>
+        </span>
+      </div>
+      <div class="field"><label>Notes (what's wrong, the story, anything useful)</label><textarea id="i_notes" placeholder="e.g., Never had an account with this collector. / Paid this off in 2023 but it still shows a balance."></textarea></div>
+      <button class="btn" onclick="saveItem()">➕ Save item</button>
+      <button class="btn ghost" id="itemCancel" onclick="resetItemForm()" style="display:none">Cancel edit</button>
+    </div>
+
+    <h2>Your items <span class="badge-cnt" id="itemCount">0</span></h2>
+    <div id="itemList"></div>
+  </section>
+
+  <!-- OVERVIEW -->
+  <section class="view" id="view-overview">
+    <h1>📊 Overview <span id="ovWho" class="pill" style="background:var(--chip);color:var(--teal-d);font-size:14px;vertical-align:middle"></span></h1>
+    <p class="sub">Everything sorted by priority, showing which bureau each item sits on and your recommended first move. Updates automatically as you import or edit items.</p>
+    <div id="ovBody"></div>
+  </section>
+
+  <!-- STRATEGY -->
+  <section class="view" id="view-strategy">
+    <h1>Your Strategy</h1>
+    <p class="sub">For each item, here's the recommended sequence of letters. Work top-to-bottom; wait for the deadline before escalating. Click any step to generate that letter pre-filled.</p>
+    <div class="note">Golden rules: <b>(1)</b> send everything by USPS certified mail with return receipt — proof is everything. <b>(2)</b> Dispute the same item with <i>every</i> bureau that's reporting it. <b>(3)</b> Keep copies of every letter and every response. <b>(4)</b> One topic per letter is cleaner than a kitchen-sink dispute.</div>
+    <div id="strategyList"></div>
+  </section>
+
+  <!-- LETTERS -->
+  <section class="view" id="view-letters">
+    <h1>Generate a Letter</h1>
+    <p class="sub">Pick a letter; the toolkit fills in your details and the disputed item. You can edit the text before printing.</p>
+    <div class="card">
+      <div class="field"><label>1. What do you need?</label>
+        <select id="l_filter" onchange="renderLetterChoices()">
+          <option value="all">Show all letters</option>
+          <option value="Bureau">Letters to the credit bureaus</option>
+          <option value="Furnisher">Letters to the creditor / furnisher</option>
+          <option value="Collector">Letters to a debt collector</option>
+          <option value="Other">Complaints &amp; other</option>
+        </select>
+      </div>
+      <div class="field"><label>2. Choose the letter</label>
+        <select id="l_type" onchange="renderLetterForm()"></select>
+      </div>
+      <div id="l_desc" class="note" style="display:none"></div>
+      <div id="l_dynamic"></div>
+      <div id="l_attestWrap" class="note warn" style="display:none">
+        <label style="display:flex;gap:10px;align-items:flex-start;color:var(--ink);font-weight:600">
+          <input type="checkbox" id="l_attest" style="width:auto;margin-top:3px">
+          <span>I have a good-faith belief that this information is inaccurate, incomplete, outdated, or unverifiable. I am not disputing information I know to be accurate.</span>
+        </label>
+      </div>
+      <button class="btn" onclick="generateFromForm()">✍️ Generate letter</button>
+    </div>
+  </section>
+
+  <!-- TRACKER -->
+  <section class="view" id="view-tracker">
+    <h1>Letter Tracker &amp; Deadlines</h1>
+    <p class="sub">Every letter you save lands here. The toolkit calculates the response deadline and flags what's overdue so nothing slips.</p>
+    <div class="card" style="overflow-x:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <h3 style="margin:0">Sent &amp; pending letters</h3>
+        <button class="btn ghost sm" onclick="go('letters')">+ Generate a new letter</button>
+      </div>
+      <div id="trackerTable"></div>
+    </div>
+  </section>
+
+  <!-- LEARN -->
+  <section class="view" id="view-learn">
+    <h1>Know Your Rights</h1>
+    <p class="sub">The laws that make all of this work — in plain English. Citing them correctly is what gets results.</p>
+
+    <details open><summary>The two laws on your side</summary>
+      <p><b>FCRA — Fair Credit Reporting Act (15 U.S.C. §1681).</b> Governs the credit bureaus and the companies that report data ("furnishers"). It gives you the right to accurate reporting, to dispute errors, and to have unverifiable items deleted.</p>
+      <p><b>FDCPA — Fair Debt Collection Practices Act (15 U.S.C. §1692).</b> Governs third-party debt collectors. It lets you demand validation, stop harassment, and control how they contact you.</p>
+    </details>
+
+    <details><summary>Key FCRA sections you'll cite</summary>
+      <ul class="clean">
+        <li><b>§609 (1681g)</b> — Your right to disclosure: get everything in your file and the sources of it. Useful to force out documentation behind an item.</li>
+        <li><b>§611 (1681i)</b> — The dispute engine. Bureaus must reinvestigate within <b>30 days</b> (45 if you add info mid-stream). Unverifiable info must be deleted. §611(a)(7) gives you the right to the <b>method of verification</b>.</li>
+        <li><b>§623 (1681s-2)</b> — Furnisher duties. You can dispute <b>directly with the creditor</b>; they can't keep reporting data they know is wrong.</li>
+        <li><b>§605 (1681c)</b> — Time limits: most negatives drop off after <b>7 years</b>; Chapter 7 bankruptcy after <b>10</b>.</li>
+        <li><b>§605B (1681c-2)</b> — Identity-theft block: with an FTC report, bureaus must block fraudulent items within <b>4 business days</b>.</li>
+      </ul>
+    </details>
+
+    <details><summary>Key FDCPA tools</summary>
+      <ul class="clean">
+        <li><b>§1692g — Validation.</b> Within 30 days of a collector's first contact, demand proof. They must <b>stop collecting</b> until they validate.</li>
+        <li><b>§1692c(c) — Cease communication.</b> You can order a collector to stop contacting you (use with care — it can prompt a lawsuit on a valid debt).</li>
+        <li><b>§1692k — Damages.</b> Violations can entitle you to up to $1,000 plus attorney's fees. Save proof of every violation.</li>
+      </ul>
+    </details>
+
+    <details><summary>How long do negative items last?</summary>
+      <table>
+        <tr><th>Item</th><th>Reporting limit (FCRA §605)</th></tr>
+        <tr><td>Late payments</td><td>7 years from the date of the missed payment</td></tr>
+        <tr><td>Collections &amp; charge-offs</td><td>7 years from ~180 days after the original delinquency (≈7½ yrs total)</td></tr>
+        <tr><td>Chapter 13 bankruptcy</td><td>7 years from filing</td></tr>
+        <tr><td>Chapter 7 bankruptcy</td><td>10 years from filing</td></tr>
+        <tr><td>Civil judgments / lawsuits</td><td>7 years (or longer if your state's SOL is longer)</td></tr>
+        <tr><td>Hard inquiries</td><td>2 years (and only affect your score for ~1)</td></tr>
+        <tr><td>Closed accounts in good standing</td><td>Up to 10 years (these <i>help</i> you — leave them)</td></tr>
+      </table>
+      <div class="note warn">Don't confuse the <b>credit-reporting clock (FCRA)</b> with the <b>statute of limitations to sue (state law)</b>. They're different lengths. And beware: making a payment or even <i>promising</i> to pay an old debt can <b>restart</b> the SOL in many states.</div>
+    </details>
+
+    <details><summary>Medical debt — the 2026 reality</summary>
+      <p>The CFPB's 2025 rule that would have banned medical debt from credit reports was <b>struck down by a federal court in July 2025</b> and is not in force. <b>However</b>, the three bureaus' voluntary changes still stand: <b>paid</b> medical collections are removed, medical collections <b>under $500</b> are removed, and there's a <b>12-month grace period</b> before any medical collection can appear. If a medical item violates these, dispute it.</p>
+    </details>
+
+    <details><summary>Dispute reasons that actually work (cheat sheet)</summary>
+      <ul class="clean">
+        <li>"This is not my account / I never opened this."</li>
+        <li>"This account was never late — the payment history is wrong."</li>
+        <li>"The balance / amount reported is incorrect."</li>
+        <li>"This was paid/settled but shows a balance owing."</li>
+        <li>"The dates (opened, last activity, first delinquency) are wrong" — wrong DOFD can keep an item on illegally past 7 years.</li>
+        <li>"This is a duplicate of another tradeline."</li>
+        <li>"This account is past the 7-year reporting limit."</li>
+        <li>"I never authorized this inquiry."</li>
+        <li>"You reported this as 'verified' — prove it: send me the method of verification."</li>
+      </ul>
+    </details>
+
+    <details><summary>Smart habits that build score while you dispute</summary>
+      <ul class="clean">
+        <li>Keep credit-card utilization under ~30% (under 10% is ideal). This is ~30% of your score and moves fast.</li>
+        <li>Never miss a current payment — payment history is the biggest factor.</li>
+        <li>Don't close old cards; age of history helps you.</li>
+        <li>Ask an on-time family member to add you as an <b>authorized user</b> on an old, low-balance card.</li>
+        <li>Avoid new hard inquiries while repairing.</li>
+        <li>Consider a secured card or credit-builder loan to add positive history.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- RESOURCES -->
+  <section class="view" id="view-resources">
+    <h1>Resources &amp; Addresses</h1>
+    <p class="sub">Verified contacts. Mailing addresses for disputes differ from corporate HQ — these go to the right department.</p>
+
+    <div class="grid3" id="bureauCards"></div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">Free credit reports</h3>
+        <p><b><a href="https://www.annualcreditreport.com" target="_blank">AnnualCreditReport.com</a></b> — the only federally authorized source. All three bureaus, now <b>free every week</b>. Avoid look-alike sites.</p>
+        <p>Specialty reports (also free): LexisNexis, ChexSystems (banking), and the work-history report from The Work Number — worth checking for errors too.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Stop new damage</h3>
+        <p><b>Opt out of prescreened offers:</b> <a href="https://www.optoutprescreen.com" target="_blank">optoutprescreen.com</a> or 1-888-567-8688.</p>
+        <p><b>Freeze your credit</b> (free) at each bureau — see cards above. A freeze blocks new accounts; lift it temporarily when you apply for credit.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">File a complaint (free leverage)</h3>
+        <p><b>CFPB:</b> <a href="https://www.consumerfinance.gov/complaint" target="_blank">consumerfinance.gov/complaint</a> · (855) 411-2372. Companies almost always respond within 15 days.</p>
+        <p><b>FTC:</b> <a href="https://reportfraud.ftc.gov" target="_blank">reportfraud.ftc.gov</a>.</p>
+        <p><b>Your State Attorney General</b> — search "[your state] attorney general consumer complaint".</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Identity theft</h3>
+        <p><b><a href="https://www.identitytheft.gov" target="_blank">IdentityTheft.gov</a></b> — file the official FTC Identity Theft Report you'll need for a §605B block, and get a recovery plan.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">Free / low-cost human help</h3>
+      <ul class="clean">
+        <li><b>NACA</b> (consumer attorneys) — <a href="https://www.consumeradvocates.org" target="_blank">consumeradvocates.org</a>. Many FCRA/FDCPA lawyers work free to you (the law makes violators pay fees).</li>
+        <li><b>Nonprofit credit counseling</b> — <a href="https://www.nfcc.org" target="_blank">NFCC.org</a>.</li>
+        <li><b>Legal aid</b> — <a href="https://www.lawhelp.org" target="_blank">LawHelp.org</a> for free help if you qualify.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<!-- Letter Modal -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Letter</h3>
+      <span class="tag" id="modalTag"></span>
+      <button class="x" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="note">Review and edit anything in brackets, then <b>print or copy</b>. Sign in ink. <b>Mail certified, return receipt requested</b>, and keep a copy.</div>
+      <textarea id="letterText" class="letter-ta" spellcheck="false"></textarea>
+      <div id="enclosureBox"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost sm" onclick="copyLetter()">📋 Copy</button>
+      <button class="btn ghost sm" onclick="downloadLetter()">⬇ Download .txt</button>
+      <button class="btn alt sm" onclick="printLetter()">🖨 Print / Save PDF</button>
+      <button class="btn sm" onclick="saveToTracker()">✅ Save to Tracker</button>
+    </div>
+  </div>
+</div>
+
+<div id="printArea"></div>
+<div class="toast" id="toast"></div>
+
+<script src="pdf.min.js"></script>
+<script>
+/* ============================ DATA LAYER ============================ */
+var KEY='crt_data_v1';
+var DATA=load();
+function defaultData(){var id=uid();return{people:[{id:id,label:'Me',profile:{},items:[],letters:[]}],activePersonId:id};}
+function normalize(d){
+  if(!d||typeof d!=='object')return defaultData();
+  if(!d.people){var nid=uid();d={people:[{id:nid,label:'Me',profile:d.profile||{},items:d.items||[],letters:d.letters||[]}],activePersonId:nid};}
+  if(!Array.isArray(d.people)||!d.people.length)return defaultData();
+  d.people.forEach(function(p){if(!p.id)p.id=uid();p.profile=p.profile||{};p.items=p.items||[];p.letters=p.letters||[];p.label=p.label||'Person';});
+  if(!d.activePersonId||!d.people.some(function(p){return p.id===d.activePersonId;}))d.activePersonId=d.people[0].id;
+  return d;
+}
+function load(){try{return normalize(JSON.parse(localStorage.getItem(KEY)));}catch(e){return defaultData();}}
+function person(){return DATA.people.find(function(p){return p.id===DATA.activePersonId;})||DATA.people[0];}
+function save(){localStorage.setItem(KEY,JSON.stringify(DATA));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+
+/* ============================ CONSTANTS ============================ */
+var BUREAUS={
+  equifax:{name:'Equifax',addr:'Equifax Information Services LLC\nP.O. Box 740256\nAtlanta, GA 30374-0256',phone:'1-800-685-1111',freeze:'https://www.equifax.com/personal/credit-report-services/credit-freeze/'},
+  experian:{name:'Experian',addr:'Experian\nP.O. Box 4500\nAllen, TX 75013',phone:'1-888-397-3742',freeze:'https://www.experian.com/freeze/center.html'},
+  transunion:{name:'TransUnion',addr:'TransUnion LLC\nConsumer Dispute Center\nP.O. Box 2000\nChester, PA 19016',phone:'1-800-916-8800',freeze:'https://www.transunion.com/credit-freeze'}
+};
+var BKEYS=['equifax','experian','transunion'];
+var PB='\n\n==== PAGE BREAK — printing starts a new page here (you can delete this line) ====\n\n';
+
+var REASONS={
+  not_mine:'This account does not belong to me. I have never opened or authorized this account, and I have no business relationship with this creditor. It is being reported in error and must be deleted.',
+  never_late:'The payment history on this account is being reported inaccurately. It reflects one or more late payments that did not occur; this account was paid as agreed. I request that the inaccurate late-payment notations be corrected or the tradeline deleted.',
+  wrong_balance:'The balance/amount being reported on this account is incorrect and does not reflect the true status of the account. I request that this inaccurate balance be corrected or the tradeline deleted.',
+  paid_settled:'This account was paid/settled in full, yet it is being reported as having an outstanding balance or an inaccurate status. I request that the reporting be corrected to reflect a zero balance or that the inaccurate tradeline be deleted.',
+  wrong_dates:'One or more dates on this account (date opened, date of last activity, and/or date of first delinquency) are being reported inaccurately. Because these dates govern how long an item may legally remain on my report, this error is material. I request correction or deletion.',
+  duplicate:'This account is a duplicate of another tradeline already appearing on my report, resulting in the same debt being reported more than once. I request that the duplicate be deleted.',
+  no_knowledge:'I have no knowledge of this account and cannot verify that it is mine. Please provide documentation proving this account belongs to me; if it cannot be verified as accurate and complete, it must be deleted under 15 U.S.C. § 1681i.',
+  unauthorized:'This account was opened fraudulently and was not authorized by me. I did not apply for, open, or benefit from this account. It is the result of identity theft and must be deleted.',
+  closed_open:'This account is being reported as open when it is in fact closed (or vice versa). This inaccurate status is misleading and must be corrected or the item deleted.',
+  reaged:'This account appears to have been improperly re-aged — the date of first delinquency has been moved forward, which unlawfully extends how long it remains on my report. I request that the correct date of first delinquency be restored or the item deleted under 15 U.S.C. § 1681c.'
+};
+var REASON_LABELS={
+  not_mine:'This is not my account',
+  never_late:'Never late — payment history is wrong',
+  wrong_balance:'Balance / amount is incorrect',
+  paid_settled:'Paid or settled, but shows a balance',
+  wrong_dates:'Dates are wrong (opened / activity / DOFD)',
+  duplicate:'Duplicate of another tradeline',
+  no_knowledge:'No knowledge of this account',
+  unauthorized:'Fraudulent / unauthorized account',
+  closed_open:'Wrong status (open vs. closed)',
+  reaged:'Improperly re-aged (DOFD moved forward)'
+};
+
+/* ============================ HELPERS ============================ */
+var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function pad(n){return n<10?'0'+n:''+n;}
+function todayISO(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function fmtLong(iso){if(!iso)return'';var p=iso.split('-');if(p.length!==3)return iso;return MONTHS[(+p[1])-1]+' '+(+p[2])+', '+p[0];}
+function addDaysISO(iso,n){var p=iso.split('-');var d=new Date(+p[0],(+p[1])-1,+p[2]);d.setDate(d.getDate()+n);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function daysBetween(aISO,bISO){var a=new Date(aISO+'T00:00:00'),b=new Date(bISO+'T00:00:00');return Math.round((b-a)/86400000);}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s){return esc(s).replace(/"/g,'&quot;');}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},1900);}
+
+function P(){return person().profile||{};}
+function senderBlock(){var p=P();var s=(p.fullName||'[YOUR FULL NAME]')+'\n'+(p.address1||'[YOUR STREET ADDRESS]')+'\n';if(p.address2)s+=p.address2+'\n';var city=[(p.city||'[CITY]'),(p.state||'[ST]')].join(', ');s+=city+' '+(p.zip||'[ZIP]');return s;}
+function idLine(){var p=P();var bits=[(p.fullName||'[YOUR FULL NAME]')];if(p.dob)bits.push('DOB: '+fmtLong(p.dob));bits.push('SSN: xxx-xx-'+(p.ssnLast4||'XXXX'));return bits.join('  |  ');}
+function signature(){var p=P();var s='\n\nRespectfully,\n\n\n______________________________\n'+(p.fullName||'[YOUR FULL NAME]');if(p.ssnLast4)s+='\nSSN: xxx-xx-'+p.ssnLast4;if(p.dob)s+='\nDOB: '+fmtLong(p.dob);return s;}
+function enclLine(extra){var base='\n\nEnclosed: a copy of my government-issued photo ID and a copy of a utility bill or bank statement showing my name and current address';return base+(extra?', '+extra:'')+'.';}
+function head(toBlock){return senderBlock()+'\n\n'+fmtLong(todayISO())+'\n\nSent via USPS Certified Mail, Return Receipt Requested\n\n'+toBlock+'\n\n';}
+function itemLines(it){if(!it)return'  • [DESCRIBE THE ITEM — creditor and account number]\n';var s='  • Creditor / Furnisher: '+(it.creditor||'[CREDITOR]')+'\n';s+='  • Account number: '+(it.account||'[ACCOUNT # AS SHOWN ON REPORT]')+'\n';if(it.amount)s+='  • Amount reported: $'+it.amount+'\n';if(it.dofd)s+='  • Date of first delinquency: '+fmtLong(it.dofd)+'\n';return s;}
+
+/* ============================ LETTER LIBRARY ============================ */
+/* Each: cat, name, desc, when, recipient, needs[], deadlineDays, build(ctx) */
+var LETTERS={
+  bureau_dispute:{cat:'Bureau',name:'Bureau dispute — inaccurate item (FCRA §611)',recipient:'bureau',needs:['item','bureau','reason','attest'],deadlineDays:30,
+    desc:'The workhorse. Disputes an inaccurate, incomplete, or unverifiable item with a credit bureau and forces a 30-day reinvestigation.',
+    when:'Use first for almost any wrong item. Send to every bureau that reports it.',
+    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Formal Dispute of Inaccurate Information\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nI am writing to formally dispute the following item on my '+B.name+' credit report, which I have reviewed and believe to be inaccurate, incomplete, or unverifiable. Under Section 611 of the Fair Credit Reporting Act (15 U.S.C. § 1681i), you must conduct a reasonable reinvestigation and delete or correct any information that cannot be verified as accurate, complete, and timely.\n\nDisputed item:\n'+itemLines(c.item)+'\nReason for dispute:\n'+(REASONS[c.reason]||'[STATE WHY THIS ITEM IS INACCURATE]')+'\n\nI request that you:\n  1. Conduct a reasonable reinvestigation of this item — 15 U.S.C. § 1681i(a)(1);\n  2. Forward all relevant information to the furnisher — § 1681i(a)(2);\n  3. Provide the written results within 30 days, with a description of the method of verification used — § 1681i(a)(6)–(7); and\n  4. Delete or correct the item if it cannot be fully verified.\n\nIf this item cannot be verified with the original furnisher, it must be promptly deleted. Please send an updated copy of my credit report once the reinvestigation is complete.'+enclLine()+signature();}},
+
+  bureau_mov:{cat:'Bureau',name:'Method of Verification demand (after "verified")',recipient:'bureau',needs:['item','bureau','priordate'],deadlineDays:15,
+    desc:'When a bureau says your item was "verified," this demands HOW they verified it. A bare "verified" with no method is not a lawful reinvestigation.',
+    when:'Send right after a dispute comes back "verified" with no explanation.',
+    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Request for Method of Verification — Previously Disputed Item\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nOn '+(c.priordate?fmtLong(c.priordate):'[DATE OF MY PRIOR DISPUTE]')+' I disputed the item below. You responded that it was "verified." I am exercising my right under Section 611(a)(7) of the FCRA (15 U.S.C. § 1681i(a)(7)) to receive a description of the procedure used to determine the accuracy and completeness of the item, including the business name, address, and (if reasonably available) telephone number of any furnisher you contacted.\n\nItem:\n'+itemLines(c.item)+'\nWithin 15 days, please provide: (1) the name of the employee who verified this item; (2) the specific documents and method used to verify it; and (3) the name, address, and phone number of the furnisher contacted. A response of "verified" — without the method of verification — does not satisfy the FCRA. If you cannot describe a reasonable procedure that actually verified this item against account-level documentation, the item must be deleted under § 1681i(a)(5)(A).'+signature();}},
+
+  bureau_noresponse:{cat:'Bureau',name:'No response in 30 days — demand deletion',recipient:'bureau',needs:['item','bureau','priordate'],deadlineDays:15,
+    desc:'If a bureau blows the 30-day deadline, the law requires deletion. This demands it.',
+    when:'Send when 30+ days have passed since your certified dispute with no results.',
+    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Failure to Reinvestigate Within 30 Days — Demand for Deletion\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nOn '+(c.priordate?fmtLong(c.priordate):'[DATE SENT]')+' I sent you a dispute (certified mail) regarding the item below. More than 30 days have passed and I have not received the results of any reinvestigation. Under Section 611(a)(5)(A) of the FCRA (15 U.S.C. § 1681i(a)(5)(A)), information that is not verified within the statutory period must be promptly deleted.\n\nItem:\n'+itemLines(c.item)+'\nI demand that you delete this item immediately and send me an updated copy of my credit report reflecting the deletion. Failure to comply is a violation of the FCRA and I will pursue all available remedies, including a complaint to the CFPB.'+signature();}},
+
+  bureau_obsolete:{cat:'Bureau',name:'Obsolete item past 7/10 years (FCRA §605)',recipient:'bureau',needs:['item','bureau'],deadlineDays:30,
+    desc:'Removes items that have exceeded the legal reporting period.',
+    when:'Use when an item is older than 7 years (10 for Chapter 7 bankruptcy) from the original delinquency/filing.',
+    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Removal of Obsolete Information — FCRA § 605 (15 U.S.C. § 1681c)\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nThe following item exceeds the maximum reporting period permitted by Section 605 of the FCRA and must be removed. Most adverse items may not be reported after seven years; a Chapter 7 bankruptcy after ten years from filing.\n\nItem:\n'+itemLines(c.item)+'\nThe original delinquency/filing date places this item beyond the legally permitted reporting period. I request that you delete it immediately and send me an updated report. If you contend it is not obsolete, please provide the date of first delinquency you are using and the basis for continued reporting.'+signature();}},
+
+  bureau_personal:{cat:'Bureau',name:'Correct personal info (name/address/DOB)',recipient:'bureau',needs:['bureau','remove'],deadlineDays:30,
+    desc:'Cleans up wrong names, addresses, birthdates, and employers — which is how accounts that aren\'t yours get "mixed" into your file.',
+    when:'Use when your report lists addresses you never lived at, misspelled names, or a wrong SSN/DOB.',
+    build:function(c){var B=BUREAUS[c.bureau];var p=P();var keepAddr=senderBlock();return head(B.addr)+'Re: Correction of Inaccurate Personal Identifying Information\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nMy '+B.name+' file contains inaccurate personal identifying information. Inaccurate identifiers can cause accounts that are not mine to be merged into my file. Please update my file to reflect ONLY the following correct information and remove every other variation:\n\n  • Correct legal name: '+(p.fullName||'[YOUR FULL NAME]')+'\n  • Correct current address:\n'+keepAddr.split('\n').slice(1).map(function(l){return'      '+l;}).join('\n')+'\n'+(p.dob?'  • Correct date of birth: '+fmtLong(p.dob)+'\n':'')+'\n'+'Please DELETE the following inaccurate personal information that does not belong to me:\n'+(c.remove?c.remove.split('\n').map(function(l){return'  • '+l;}).join('\n'):'  • [LIST THE WRONG NAMES / ADDRESSES / EMPLOYERS TO REMOVE]')+'\n\nPlease confirm the corrections in writing and send an updated report.'+enclLine()+signature();}},
+
+  bureau_inquiry:{cat:'Bureau',name:'Dispute unauthorized hard inquiry',recipient:'bureau',needs:['bureau','inquiry'],deadlineDays:30,
+    desc:'Removes hard inquiries you never authorized (no permissible purpose under FCRA §604).',
+    when:'Use for pulls you didn\'t apply for. (Inquiries you did authorize are legitimate and won\'t be removed.)',
+    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Dispute of Unauthorized Credit Inquiry\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nThe following hard inquiry(ies) appear on my '+B.name+' report. I did not apply for credit with, nor authorize, the party(ies) below to access my credit report. Under 15 U.S.C. § 1681b, a consumer report may be furnished only for a permissible purpose, which requires my authorization for these inquiries.\n\nUnauthorized inquiry(ies):\n'+(c.inquiry?c.inquiry.split('\n').map(function(l){return'  • '+l;}).join('\n'):'  • [COMPANY NAME — DATE OF INQUIRY]')+'\n\nPlease remove the unauthorized inquiry(ies) above. If you contend an inquiry was authorized, provide proof of my written authorization or the specific permissible purpose relied upon, as required by law.'+signature();}},
+
+  bureau_605b:{cat:'Bureau',name:'Identity-theft block (FCRA §605B)',recipient:'bureau',needs:['item','bureau','ftc'],deadlineDays:4,
+    desc:'The fastest removal there is: with an FTC Identity Theft Report, the bureau must BLOCK fraudulent items within 4 business days.',
+    when:'Use for items resulting from identity theft. File your report first at IdentityTheft.gov.',
+    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Request to Block Information Resulting from Identity Theft — FCRA § 605B (15 U.S.C. § 1681c-2)\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nI am a victim of identity theft. The item(s) below resulted from identity theft and were not incurred by me. Pursuant to Section 605B of the FCRA, I request that you BLOCK this information within four (4) business days of receipt.\n\nFraudulent item(s):\n'+itemLines(c.item)+'\nEnclosed are: (1) a copy of my FTC Identity Theft Report'+(c.ftc?' (report number '+c.ftc+')':'')+'; (2) proof of my identity; and (3) this statement identifying the fraudulent information. Please block the item(s), notify the furnisher(s), and confirm in writing.'+enclLine('and a copy of my FTC Identity Theft Report from IdentityTheft.gov')+signature();}},
+
+  bureau_609:{cat:'Bureau',name:'§609 request for file disclosure & documentation',recipient:'bureau',needs:['bureau','item'],deadlineDays:30,
+    desc:'Demands your full file and the documentation behind a tradeline. If they can\'t produce the original signed contract, the item is unverifiable.',
+    when:'Use to pressure for account-level proof, often alongside or after a §611 dispute.',
+    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Request for Disclosure of File Information — FCRA § 609 (15 U.S.C. § 1681g)\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nPursuant to Section 609 of the FCRA, I request full disclosure of all information in my consumer file, including:\n  1. All information in my file at the time of this request;\n  2. The sources of that information;\n  3. Each person that procured my consumer report in the prior two years (one year for non-employment purposes); and\n  4. For the item below, copies of any documentation you relied upon to verify it — including the original signed application or contract.\n\nItem of particular interest:\n'+itemLines(c.item)+'\nIf you cannot produce account-level documentation verifying this item, it is unverified and must be deleted under 15 U.S.C. § 1681i.'+enclLine()+signature();}},
+
+  furnisher_dispute:{cat:'Furnisher',name:'Direct dispute to the creditor (FCRA §623)',recipient:'furnisher',needs:['item','toaddr','reason','attest'],deadlineDays:30,
+    desc:'Goes straight to the company reporting the data. They must investigate and stop furnishing data they know is wrong.',
+    when:'Powerful as a second front alongside bureau disputes — especially after a bureau "verifies."',
+    build:function(c){var to=c.toaddr||'[CREDITOR / FURNISHER NAME]\n[ADDRESS]\n[CITY, STATE ZIP]';return head(to)+'Re: Direct Dispute of Inaccurate Credit Reporting — FCRA § 623 (15 U.S.C. § 1681s-2)\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nYou are furnishing information about the account below to one or more credit bureaus. I dispute the accuracy of that reporting directly with you. Under Section 623(b) of the FCRA, upon receiving notice of a dispute you must conduct an investigation, review all relevant information, and report the results to every credit bureau to which you furnished the data — and you may not continue to report information you know or have reasonable cause to believe is inaccurate.\n\nAccount:\n'+itemLines(c.item)+'\nReason for dispute:\n'+(REASONS[c.reason]||'[STATE WHY THIS IS INACCURATE]')+'\n\nPlease investigate, correct or delete the inaccurate reporting with all bureaus, and confirm the outcome to me in writing.'+enclLine()+signature();}},
+
+  furnisher_goodwill:{cat:'Furnisher',name:'Goodwill letter (remove accurate late payments)',recipient:'furnisher',needs:['item','toaddr','story'],deadlineDays:0,
+    desc:'A polite request asking a creditor to remove a legitimate late payment as a courtesy. No legal force — but free and sometimes works, especially for a one-time slip on an otherwise good account.',
+    when:'Use ONLY for accurate lates where the account is now in good standing. This is the right tool when an item is correct and you can\'t dispute it.',
+    build:function(c){var to=c.toaddr||'[CREDITOR NAME]\n[ATTN: Customer Relations / Executive Office]\n[ADDRESS]\n[CITY, STATE ZIP]';return head(to)+'Re: Goodwill Request — Account '+((c.item&&c.item.account)||'[ACCOUNT #]')+'\nConsumer: '+idLine()+'\n\nDear '+((c.item&&c.item.creditor)||'[CREDITOR]')+' Team,\n\nI have been a customer and I take my obligations seriously. I am writing to respectfully ask for a goodwill adjustment to the reporting on the account referenced above.\n\n'+(c.story||'[Briefly and honestly explain what happened — e.g., a one-time hardship, medical issue, or oversight — and that it has been resolved.]')+'\n\nThe account is now in good standing. The late-payment notation does not reflect my overall history with you, and it is creating a significant obstacle for me. As a gesture of goodwill, I am respectfully asking that you remove the late-payment notation(s) reported on this account to the credit bureaus.\n\nI understand this is at your discretion, and I am grateful for any consideration. Thank you for your time and for the relationship we have had.'+signature();}},
+
+  collector_validation:{cat:'Collector',name:'Debt validation demand (FDCPA §1692g)',recipient:'collector',needs:['item','toaddr'],deadlineDays:35,
+    desc:'Forces a debt collector to PROVE the debt is yours and theirs to collect. They must stop collecting until they validate.',
+    when:'Send to any third-party collector — ideally within 30 days of their first contact, but valuable any time you haven\'t been validated.',
+    build:function(c){var to=c.toaddr||'[COLLECTION AGENCY NAME]\n[ADDRESS]\n[CITY, STATE ZIP]';return head(to)+'Re: Debt Validation Request — Alleged Account '+((c.item&&c.item.account)||'[ACCOUNT #]')+'\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nThis letter concerns the alleged debt referenced above. I am not refusing to pay, but I am exercising my right under Section 809(b) of the Fair Debt Collection Practices Act (15 U.S.C. § 1692g) to dispute this debt and request validation. Please provide:\n  1. Proof that you own or were assigned this debt and have the legal right to collect it;\n  2. A copy of the original signed agreement or contract;\n  3. A complete accounting: original creditor, original account number, the amount, and an itemization of all interest and fees;\n  4. Verification that this debt is within the statute of limitations; and\n  5. Proof you are licensed to collect in my state, with your license number.\n\nUntil you provide validation, you must CEASE all collection activity, as required by § 1692g(b). I also request that you cease reporting this account to the credit bureaus until it is validated — reporting a debt you have not validated may violate the FDCPA and the FCRA. I dispute the validity of this debt in its entirety and have not waived any rights. Please communicate with me in writing only.'+signature();}},
+
+  collector_validation_followup:{cat:'Collector',name:'Failure to validate — violation notice',recipient:'collector',needs:['item','toaddr','priordate'],deadlineDays:15,
+    desc:'When a collector ignores your validation request but keeps collecting or reporting — a documented FDCPA violation.',
+    when:'Send if a collector continues activity after your validation demand without providing proof.',
+    build:function(c){var to=c.toaddr||'[COLLECTION AGENCY NAME]\n[ADDRESS]\n[CITY, STATE ZIP]';return head(to)+'Re: Failure to Validate — Continued Collection/Reporting in Violation of the FDCPA\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nOn '+(c.priordate?fmtLong(c.priordate):'[DATE]')+' I sent a written request for validation of the alleged debt below (certified mail). You have continued collection activity and/or credit reporting without providing the validation required by 15 U.S.C. § 1692g(b). This is a violation of the FDCPA.\n\nAlleged account:\n'+itemLines(c.item)+'\nI demand that you: (1) cease all collection activity; (2) delete this account from every credit bureau to which you have reported it; and (3) confirm in writing that you have done so. Continued violations may subject you to statutory damages, actual damages, and attorney\'s fees under 15 U.S.C. § 1692k. I am documenting all violations.'+signature();}},
+
+  payfordelete:{cat:'Collector',name:'Pay-for-delete settlement offer',recipient:'collector',needs:['item','toaddr','amount'],deadlineDays:0,
+    desc:'Offers payment in exchange for complete removal of the tradeline — in writing, BEFORE you pay a cent.',
+    when:'Use for a debt you accept is yours and are willing to pay, when you\'d rather it be deleted than show as "paid collection."',
+    build:function(c){var to=c.toaddr||'[COLLECTION AGENCY / CREDITOR]\n[ADDRESS]\n[CITY, STATE ZIP]';return head(to)+'Re: Settlement Offer Conditioned on Deletion — Account '+((c.item&&c.item.account)||'[ACCOUNT #]')+'\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nWithout admitting that this debt is valid or that I owe it, I am offering to resolve the account referenced above. I will pay $'+(c.amount||'[AMOUNT]')+' as full and final satisfaction, on the express condition that you AGREE IN WRITING, BEFORE any payment is made, to:\n  1. Accept $'+(c.amount||'[AMOUNT]')+' as full satisfaction of the account; and\n  2. Request DELETION of this tradeline (a complete removal, not an update to "paid") from every credit bureau to which it has been reported.\n\nThis offer is valid for 30 days. Please respond in writing only — do not call. If you accept, send a signed letter on company letterhead confirming both terms, and I will remit payment within 10 days of receipt. Do not accept or deposit any payment unless you accept these terms in full. This letter is an attempt to settle and is not an acknowledgment of the debt.'+signature();}},
+
+  collector_cease:{cat:'Collector',name:'Cease communication (FDCPA §1692c)',recipient:'collector',needs:['item','toaddr'],deadlineDays:0,
+    desc:'Legally orders a collector to stop contacting you.',
+    when:'Use to stop harassment. Caution: it does not erase a valid debt and may prompt a lawsuit — prefer validation first if the debt is unverified.',
+    build:function(c){var to=c.toaddr||'[COLLECTION AGENCY NAME]\n[ADDRESS]\n[CITY, STATE ZIP]';return head(to)+'Re: Notice to Cease Communication — FDCPA § 805(c) (15 U.S.C. § 1692c(c))\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nRegarding the alleged debt below, pursuant to Section 805(c) of the FDCPA I am notifying you to CEASE all communication with me, except as the statute permits (to advise that your efforts are being terminated, or to notify me of a specific remedy you intend to invoke).\n\nAlleged account:\n'+itemLines(c.item)+'\nDo not contact me by telephone, at my place of employment, or through third parties. Any necessary communication must be in writing. This notice does not constitute an acknowledgment that I owe this debt.'+signature();}},
+
+  collector_sol:{cat:'Collector',name:'Time-barred debt notice (statute of limitations)',recipient:'collector',needs:['item','toaddr'],deadlineDays:0,
+    desc:'Puts a collector on notice that the debt is too old to sue on — without making a payment or promise that could restart the clock.',
+    when:'Use for old debts past your state\'s statute of limitations to sue.',
+    build:function(c){var to=c.toaddr||'[COLLECTION AGENCY NAME]\n[ADDRESS]\n[CITY, STATE ZIP]';return head(to)+'Re: Notice of Time-Barred Debt — Statute of Limitations Expired\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nI dispute the alleged debt below. Based on the date of last activity, this debt is beyond the statute of limitations for legal collection in my state. I do not acknowledge that I owe this debt, and I make no payment or promise to pay (which I understand could restart the limitations period).\n\nAlleged account:\n'+itemLines(c.item)+'\nI demand that you cease collection on this time-barred debt and refrain from filing or threatening suit, as such action on a time-barred debt may violate the FDCPA. If this item is being reported beyond the FCRA period, delete it. Communicate in writing only.'+signature();}},
+
+  complaint_cfpb:{cat:'Other',name:'CFPB / regulator complaint draft',recipient:'agency',needs:['item','company','narrative'],deadlineDays:15,
+    desc:'A ready-to-paste complaint narrative for the CFPB portal (and your State AG). Often the fastest way to break a stalemate.',
+    when:'Use after a bureau or furnisher ignores you or mishandles a dispute.',
+    build:function(c){return'COMPLAINT NARRATIVE\nFor submission at consumerfinance.gov/complaint and/or to my State Attorney General\n\nConsumer: '+idLine()+'\nContact: '+((P().phone)||'[PHONE]')+' | '+((P().email)||'[EMAIL]')+'\nCompany complained about: '+(c.company||'[COMPANY NAME]')+'\nProduct: Credit reporting / Debt collection\n\nWHAT HAPPENED\n'+(c.narrative||'[Describe in plain language: what you disputed, when, how (certified mail), and how the company failed to investigate, validate, correct, or respond.]')+'\n\nITEM AT ISSUE\n'+itemLines(c.item)+'\nLAW\nThe company failed to meet its obligations under the FCRA (15 U.S.C. § 1681i and/or § 1681s-2) and/or the FDCPA (15 U.S.C. § 1692g). Despite my written dispute(s) sent by certified mail, the inaccurate/unverified item above was not properly investigated, corrected, or deleted.\n\nRESOLUTION REQUESTED\nA proper reinvestigation and deletion or correction of the inaccurate item, written confirmation of the outcome, and an updated copy of my credit report.';}}
+};
+
+/* ============================ STRATEGY ENGINE ============================ */
+function recommendFor(it){
+  var steps=[];
+  function add(id,note){steps.push({id:id,note:note||''});}
+  var acc=it.accuracy;
+  switch(it.category){
+    case 'not_mine_fraud':
+      add('bureau_605b','Fastest path IF you file an FTC Identity Theft Report first (4-business-day block).');
+      add('bureau_dispute','Dispute as "not mine / fraudulent" with every bureau reporting it.');
+      add('furnisher_dispute','Tell the furnisher directly to stop reporting fraud.');
+      add('complaint_cfpb','Escalate if it isn\'t removed.');
+      break;
+    case 'collection':
+      add('collector_validation','START HERE. Make the collector prove it before anything else.');
+      add('bureau_dispute','If unvalidated or inaccurate, dispute with the bureaus in parallel.');
+      add('collector_validation_followup','If they keep collecting/reporting without proof — violation notice.');
+      if(acc!=='inaccurate')add('payfordelete','If it\'s genuinely yours and you\'ll pay, negotiate deletion in writing.');
+      add('complaint_cfpb','Escalate if ignored.');
+      break;
+    case 'chargeoff':
+      add('bureau_dispute','Dispute any inaccuracy (balance, dates, status) with all bureaus.');
+      add('furnisher_dispute','Dispute directly with the original creditor.');
+      add('bureau_mov','If "verified," demand the method of verification.');
+      if(acc==='accurate')add('furnisher_goodwill','If fully accurate, a goodwill request is your best shot.');
+      break;
+    case 'account_late':
+      if(acc==='accurate'){add('furnisher_goodwill','Accurate lates can only be removed at the creditor\'s goodwill — this is the right tool.');}
+      else{add('bureau_dispute','Dispute the inaccurate late history ("never late") with all bureaus.');add('furnisher_dispute','Dispute directly with the creditor.');add('bureau_mov','If "verified," demand the method of verification.');}
+      break;
+    case 'inquiry':
+      add('bureau_inquiry','Dispute the unauthorized pull with each bureau showing it.');
+      break;
+    case 'public_record':
+      add('bureau_dispute','Dispute inaccuracies; most judgments shouldn\'t even be on modern reports.');
+      add('bureau_obsolete','If older than 7 years (10 for Ch.7), demand removal as obsolete.');
+      add('complaint_cfpb','Escalate if not corrected.');
+      break;
+    case 'personal_info':
+      add('bureau_personal','Correct/remove the wrong identifiers with each bureau.');
+      break;
+    case 'repossession':
+      add('bureau_dispute','Dispute any inaccuracy (deficiency balance, dates, status).');
+      add('furnisher_dispute','Dispute directly with the lender.');
+      if(acc!=='inaccurate')add('payfordelete','Negotiate a deletion if you\'ll settle the deficiency.');
+      break;
+    default:
+      add('bureau_dispute','General dispute with the bureaus.');
+      add('furnisher_dispute','Dispute directly with the furnisher.');
+  }
+  return steps;
+}
+
+/* ============================ NAV ============================ */
+var TABS=[
+  {id:'start',label:'Start Here'},
+  {id:'info',label:'My Info'},
+  {id:'items',label:'Negative Items'},
+  {id:'overview',label:'📊 Overview'},
+  {id:'strategy',label:'Strategy'},
+  {id:'letters',label:'Generate Letters'},
+  {id:'tracker',label:'Tracker'},
+  {id:'learn',label:'Know Your Rights'},
+  {id:'resources',label:'Resources'}
+];
+function buildTabs(){var bar=document.getElementById('tabbar');bar.innerHTML='';TABS.forEach(function(t){var d=document.createElement('div');d.className='tab';d.id='tab-'+t.id;d.textContent=t.label;d.onclick=function(){go(t.id);};bar.appendChild(d);});}
+function go(id){
+  TABS.forEach(function(t){document.getElementById('tab-'+t.id).classList.toggle('active',t.id===id);document.getElementById('view-'+t.id).classList.toggle('active',t.id===id);});
+  window.scrollTo(0,0);
+  if(id==='strategy')renderStrategy();
+  if(id==='overview')renderOverview();
+  if(id==='items'){renderItems();loadAiKey();}
+  if(id==='tracker')renderTracker();
+  if(id==='start')renderStats();
+  if(id==='letters'){renderLetterChoices();}
+}
+
+/* ============================ PROFILE ============================ */
+var PF=['fullName','formerNames','dob','ssnLast4','address1','address2','city','state','zip','phone','email','formerAddresses'];
+function loadProfileForm(){var p=P();PF.forEach(function(k){var el=document.getElementById('p_'+k);if(el)el.value=p[k]||'';});var w=document.getElementById('whoLabel');if(w)w.textContent=person().label;}
+function saveProfile(){var p={};PF.forEach(function(k){var el=document.getElementById('p_'+k);if(el)p[k]=el.value.trim();});p.state=(p.state||'').toUpperCase();person().profile=p;save();var b=document.getElementById('profileSaved');b.style.display='inline-block';setTimeout(function(){b.style.display='none';},2200);toast('Information saved on this device');renderStats();}
+
+/* ============================ ITEMS ============================ */
+function readItemForm(){
+  var bs=[];if(document.getElementById('i_b_equifax').checked)bs.push('equifax');if(document.getElementById('i_b_experian').checked)bs.push('experian');if(document.getElementById('i_b_transunion').checked)bs.push('transunion');
+  return{id:document.getElementById('i_id').value||uid(),creditor:document.getElementById('i_creditor').value.trim(),account:document.getElementById('i_account').value.trim(),category:document.getElementById('i_category').value,accuracy:document.getElementById('i_accuracy').value,amount:document.getElementById('i_amount').value.trim(),dateOpened:document.getElementById('i_dateOpened').value,dofd:document.getElementById('i_dofd').value,status:document.getElementById('i_status').value.trim(),bureaus:bs,notes:document.getElementById('i_notes').value.trim()};
+}
+function saveItem(){
+  var it=readItemForm();
+  if(!it.creditor){toast('Enter the creditor/collector name');return;}
+  if(it.bureaus.length===0){toast('Check at least one bureau where it appears');return;}
+  var idx=person().items.findIndex(function(x){return x.id===it.id;});
+  if(idx>=0)person().items[idx]=it;else person().items.push(it);
+  save();resetItemForm();renderItems();renderOverview();renderStats();toast('Item saved');
+}
+function resetItemForm(){
+  ['i_id','i_creditor','i_account','i_amount','i_dateOpened','i_dofd','i_status','i_notes'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('i_category').value='collection';document.getElementById('i_accuracy').value='inaccurate';
+  ['i_b_equifax','i_b_experian','i_b_transunion'].forEach(function(id){document.getElementById(id).checked=false;});
+  document.getElementById('itemFormTitle').textContent='Add an item';document.getElementById('itemCancel').style.display='none';
+}
+function editItem(id){
+  var it=person().items.find(function(x){return x.id===id;});if(!it)return;
+  document.getElementById('i_id').value=it.id;document.getElementById('i_creditor').value=it.creditor||'';document.getElementById('i_account').value=it.account||'';document.getElementById('i_category').value=it.category;document.getElementById('i_accuracy').value=it.accuracy;document.getElementById('i_amount').value=it.amount||'';document.getElementById('i_dateOpened').value=it.dateOpened||'';document.getElementById('i_dofd').value=it.dofd||'';document.getElementById('i_status').value=it.status||'';document.getElementById('i_notes').value=it.notes||'';
+  document.getElementById('i_b_equifax').checked=it.bureaus.indexOf('equifax')>=0;document.getElementById('i_b_experian').checked=it.bureaus.indexOf('experian')>=0;document.getElementById('i_b_transunion').checked=it.bureaus.indexOf('transunion')>=0;
+  document.getElementById('itemFormTitle').textContent='Edit item';document.getElementById('itemCancel').style.display='inline-flex';
+  go('items');window.scrollTo(0,0);
+}
+function deleteItem(id){if(!confirm('Delete this item?'))return;person().items=person().items.filter(function(x){return x.id!==id;});save();renderItems();renderOverview();renderStats();}
+var CATLABEL={collection:'Collection',chargeoff:'Charge-off',account_late:'Late payments',not_mine_fraud:'Not mine / fraud',inquiry:'Hard inquiry',public_record:'Public record',personal_info:'Personal info',repossession:'Repossession',other:'Other'};
+function bureauPills(bs){return bs.map(function(b){var cls=b==='equifax'?'eq':b==='experian'?'ex':'tu';return'<span class="pill '+cls+'">'+BUREAUS[b].name+'</span>';}).join(' ');}
+function renderItems(){
+  var wrap=document.getElementById('itemList');document.getElementById('itemCount').textContent=person().items.length;
+  if(person().items.length===0){wrap.innerHTML='<div class="card empty">No items yet. Add the negative items from your credit reports above, and your strategy will appear automatically.</div>';return;}
+  wrap.innerHTML=person().items.map(function(it){
+    var accPill=it.accuracy==='accurate'?'<span class="pill warn">accurate</span>':it.accuracy==='unsure'?'<span class="pill gray">unverified</span>':'<span class="pill bad">inaccurate</span>';
+    return '<div class="card"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">'
+      +'<div><div style="font-size:16px;font-weight:800">'+esc(it.creditor)+(it.account?' <span style="color:var(--muted);font-weight:500">· '+esc(it.account)+'</span>':'')+'</div>'
+      +'<div style="margin:8px 0">'+'<span class="pill gray">'+CATLABEL[it.category]+'</span> '+accPill+' '+bureauPills(it.bureaus)+'</div>'
+      +'<div class="kv">'+(it.amount?'<span><b>Amount:</b> $'+esc(it.amount)+'</span>':'')+(it.status?'<span><b>Status:</b> '+esc(it.status)+'</span>':'')+(it.dofd?'<span><b>DOFD:</b> '+fmtLong(it.dofd)+'</span>':'')+'</div>'
+      +(it.notes?'<div style="margin-top:6px;color:var(--muted);font-size:13.5px">'+esc(it.notes)+'</div>':'')+'</div>'
+      +'<div class="row-actions"><button class="btn ghost sm" onclick="editItem(\''+it.id+'\')">Edit</button><button class="btn danger sm" onclick="deleteItem(\''+it.id+'\')">Delete</button></div>'
+      +'</div>'
+      +'<div style="margin-top:12px;border-top:1px dashed var(--line);padding-top:10px"><b style="font-size:13px;color:var(--muted)">RECOMMENDED:</b> '
+      +recommendFor(it).map(function(s){return'<button class="btn ghost sm" style="margin:4px 4px 0 0" onclick="quickGen(\''+it.id+'\',\''+s.id+'\')">'+LETTERS[s.id].name.split('(')[0].trim()+'</button>';}).join('')+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+/* ============================ STRATEGY ============================ */
+function renderStrategy(){
+  var wrap=document.getElementById('strategyList');
+  if(person().items.length===0){wrap.innerHTML='<div class="card empty">Add your negative items first — then a tailored, step-by-step plan appears here for each one.</div>';return;}
+  wrap.innerHTML=person().items.map(function(it){
+    var steps=recommendFor(it);
+    return '<div class="card"><h3 style="margin-top:0">'+esc(it.creditor)+' <span class="pill gray">'+CATLABEL[it.category]+'</span> '+bureauPills(it.bureaus)+'</h3>'
+      +'<ol class="steps">'+steps.map(function(s){var L=LETTERS[s.id];return'<li><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div><b>'+esc(L.name)+'</b><div style="color:var(--muted);font-size:13px;margin-top:3px">'+esc(s.note)+'</div></div><button class="btn sm" onclick="quickGen(\''+it.id+'\',\''+s.id+'\')">Generate ✍️</button></div></li>';}).join('')+'</ol></div>';
+  }).join('');
+}
+
+/* ============================ LETTER GENERATION ============================ */
+var currentLetter={id:null,text:'',meta:null};
+
+function renderLetterChoices(){
+  var f=document.getElementById('l_filter').value;var sel=document.getElementById('l_type');
+  sel.innerHTML='';
+  Object.keys(LETTERS).forEach(function(id){var L=LETTERS[id];if(f==='all'||L.cat===f){var o=document.createElement('option');o.value=id;o.textContent=L.name;sel.appendChild(o);}});
+  renderLetterForm();
+}
+function renderLetterForm(){
+  var id=document.getElementById('l_type').value;var L=LETTERS[id];if(!L)return;
+  var d=document.getElementById('l_desc');d.style.display='block';d.innerHTML='<b>What it does:</b> '+esc(L.desc)+'<br><b>When to use:</b> '+esc(L.when);
+  var dyn=document.getElementById('l_dynamic');var h='';
+  if(L.needs.indexOf('item')>=0){
+    h+='<div class="field"><label>Which item?</label><select id="f_item">'+(person().items.length?person().items.map(function(it){return'<option value="'+it.id+'">'+esc(it.creditor)+(it.account?' · '+esc(it.account):'')+'</option>';}).join(''):'<option value="">— no items added yet —</option>')+'</select></div>';
+  }
+  if(L.needs.indexOf('bureau')>=0){
+    h+='<div class="field"><label>Send to which bureau?</label><select id="f_bureau"><option value="all">All bureaus reporting this item (recommended — prints one page each)</option><option value="equifax">Equifax only</option><option value="experian">Experian only</option><option value="transunion">TransUnion only</option></select></div>';
+  }
+  if(L.needs.indexOf('reason')>=0){
+    h+='<div class="field"><label>Reason for dispute</label><select id="f_reason">'+Object.keys(REASON_LABELS).map(function(r){return'<option value="'+r+'">'+REASON_LABELS[r]+'</option>';}).join('')+'</select></div>';
+  }
+  if(L.needs.indexOf('toaddr')>=0){
+    h+='<div class="field"><label>Recipient name &amp; address (creditor / collector)</label><textarea id="f_toaddr" placeholder="Midland Credit Management\nP.O. Box 939069\nSan Diego, CA 92193"></textarea></div>';
+  }
+  if(L.needs.indexOf('priordate')>=0){h+='<div class="field"><label>Date of your prior letter</label><input type="date" id="f_priordate"></div>';}
+  if(L.needs.indexOf('remove')>=0){h+='<div class="field"><label>Wrong personal info to remove (one per line)</label><textarea id="f_remove" placeholder="Old address: 99 Other St, City, ST\nMisspelled name: JON DOE\nWrong employer: ACME INC"></textarea></div>';}
+  if(L.needs.indexOf('inquiry')>=0){h+='<div class="field"><label>Unauthorized inquiry(ies) (one per line: company — date)</label><textarea id="f_inquiry" placeholder="ABC Auto Finance — 03/14/2025"></textarea></div>';}
+  if(L.needs.indexOf('ftc')>=0){h+='<div class="field"><label>FTC Identity Theft Report number (from IdentityTheft.gov)</label><input id="f_ftc" placeholder="Optional but strongly recommended"></div>';}
+  if(L.needs.indexOf('amount')>=0){h+='<div class="field"><label>Settlement amount you\'re offering ($)</label><input id="f_amount" placeholder="450"></div>';}
+  if(L.needs.indexOf('story')>=0){h+='<div class="field"><label>Your goodwill explanation (honest, brief)</label><textarea id="f_story" placeholder="In early 2024 I had a medical emergency that caused me to miss a payment. I have since brought the account current and have paid on time for over a year."></textarea></div>';}
+  if(L.needs.indexOf('company')>=0){h+='<div class="field"><label>Company you\'re complaining about</label><input id="f_company" placeholder="Experian / XYZ Collections"></div>';}
+  if(L.needs.indexOf('narrative')>=0){h+='<div class="field"><label>What happened (your story)</label><textarea id="f_narrative" placeholder="On 4/2/2026 I mailed a certified dispute about this account. On 5/20 Experian responded &#39;verified&#39; with no explanation. The balance they verified is wrong; I have proof of payment..."></textarea></div>';}
+  dyn.innerHTML=h;
+  document.getElementById('l_attestWrap').style.display=(L.needs.indexOf('attest')>=0)?'block':'none';
+  if(L.needs.indexOf('attest')>=0)document.getElementById('l_attest').checked=false;
+}
+function gatherCtx(L){
+  var c={};
+  if(L.needs.indexOf('item')>=0){var iid=document.getElementById('f_item').value;c.item=person().items.find(function(x){return x.id===iid;})||null;}
+  if(L.needs.indexOf('bureau')>=0)c.bureau=document.getElementById('f_bureau').value;
+  if(L.needs.indexOf('reason')>=0)c.reason=document.getElementById('f_reason').value;
+  if(L.needs.indexOf('toaddr')>=0)c.toaddr=document.getElementById('f_toaddr').value.trim();
+  if(L.needs.indexOf('priordate')>=0)c.priordate=document.getElementById('f_priordate').value;
+  if(L.needs.indexOf('remove')>=0)c.remove=document.getElementById('f_remove').value.trim();
+  if(L.needs.indexOf('inquiry')>=0)c.inquiry=document.getElementById('f_inquiry').value.trim();
+  if(L.needs.indexOf('ftc')>=0)c.ftc=document.getElementById('f_ftc').value.trim();
+  if(L.needs.indexOf('amount')>=0)c.amount=document.getElementById('f_amount').value.trim();
+  if(L.needs.indexOf('story')>=0)c.story=document.getElementById('f_story').value.trim();
+  if(L.needs.indexOf('company')>=0)c.company=document.getElementById('f_company').value.trim();
+  if(L.needs.indexOf('narrative')>=0)c.narrative=document.getElementById('f_narrative').value.trim();
+  return c;
+}
+function generateFromForm(){
+  var id=document.getElementById('l_type').value;var L=LETTERS[id];if(!L)return;
+  if(L.needs.indexOf('attest')>=0&&!document.getElementById('l_attest').checked){toast('Please confirm the good-faith attestation first');return;}
+  if(L.needs.indexOf('item')>=0&&person().items.length===0){toast('Add an item first (Negative Items tab)');return;}
+  var c=gatherCtx(L);
+  buildAndShow(id,c);
+}
+function quickGen(itemId,letterId){
+  var L=LETTERS[letterId];var it=person().items.find(function(x){return x.id===itemId;});
+  var c={item:it};
+  if(L.needs.indexOf('bureau')>=0)c.bureau='all';
+  if(L.needs.indexOf('reason')>=0){c.reason=defaultReason(it);}
+  if(L.needs.indexOf('toaddr')>=0)c.toaddr='';
+  buildAndShow(letterId,c,it);
+}
+function defaultReason(it){
+  if(!it)return'not_mine';
+  switch(it.category){case'not_mine_fraud':return'not_mine';case'account_late':return'never_late';case'collection':return it.accuracy==='inaccurate'?'no_knowledge':'wrong_balance';case'chargeoff':return'wrong_balance';case'public_record':return'no_knowledge';default:return it.accuracy==='accurate'?'wrong_balance':'no_knowledge';}
+}
+function buildAndShow(letterId,c,itemForName){
+  var L=LETTERS[letterId];var text;
+  if(L.recipient==='bureau'&&c.bureau==='all'){
+    var list=(c.item&&c.item.bureaus&&c.item.bureaus.length)?c.item.bureaus:BKEYS;
+    text=list.map(function(b){var cc=Object.assign({},c);cc.bureau=b;return L.build(cc);}).join(PB);
+  }else{
+    text=L.build(c);
+  }
+  currentLetter={id:letterId,text:text,meta:{recipient:L.recipient,bureau:c.bureau,item:c.item||itemForName||null,deadlineDays:L.deadlineDays,name:L.name}};
+  openModal(L,text);
+}
+function openModal(L,text){
+  document.getElementById('modalTitle').textContent=L.name;
+  document.getElementById('modalTag').textContent=L.cat+' letter';
+  document.getElementById('letterText').value=text;
+  document.getElementById('enclosureBox').innerHTML=enclosureChecklist(L);
+  document.getElementById('modal').classList.add('open');
+}
+function enclosureChecklist(L){
+  var items=['Sign the letter in ink before mailing','Make a photocopy of the signed letter for your records','Send by USPS <b>Certified Mail, Return Receipt Requested</b> — keep the green card &amp; tracking #'];
+  if(L.recipient==='bureau'){items.unshift('Enclose a copy of your <b>photo ID</b> and a <b>utility bill</b> (proof of address)');}
+  if(L.needs.indexOf('ftc')>=0){items.unshift('Enclose your <b>FTC Identity Theft Report</b> from IdentityTheft.gov');}
+  return'<div class="card" style="margin:14px 0 0;background:#f7fafc"><b style="font-size:13px;color:var(--muted)">BEFORE YOU MAIL — CHECKLIST</b><ul class="checklist">'+items.map(function(t){return'<li><input type="checkbox">'+'<span>'+t+'</span></li>';}).join('')+'</ul></div>';
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function copyLetter(){var t=document.getElementById('letterText');t.select();try{document.execCommand('copy');}catch(e){}if(navigator.clipboard){navigator.clipboard.writeText(t.value);}toast('Letter copied');}
+function downloadLetter(){var txt=document.getElementById('letterText').value;var name=(currentLetter.meta.name||'letter').replace(/[^a-z0-9]+/gi,'_').slice(0,40);var blob=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name+'.txt';a.click();toast('Downloaded');}
+function printLetter(){
+  var txt=document.getElementById('letterText').value;var pa=document.getElementById('printArea');
+  var parts=txt.split(/^.*PAGE BREAK.*$/m);
+  pa.innerHTML=parts.map(function(p,i){return'<div'+(i<parts.length-1?' class="pb"':'')+'>'+esc(p.trim())+'</div>';}).join('');
+  window.print();
+}
+
+/* ============================ TRACKER ============================ */
+function saveToTracker(){
+  var m=currentLetter.meta;
+  var itemRef=m.item?(m.item.creditor+(m.item.account?' · '+m.item.account:'')):'—';
+  var recip=m.recipient==='bureau'?(m.bureau==='all'?'All bureaus':(BUREAUS[m.bureau]?BUREAUS[m.bureau].name:m.bureau)):(m.recipient.charAt(0).toUpperCase()+m.recipient.slice(1));
+  var round=1;person().letters.forEach(function(x){if(x.itemRef===itemRef)round++;});
+  var entry={id:uid(),name:m.name,recipient:recip,itemRef:itemRef,dateSent:todayISO(),deadlineDays:m.deadlineDays||30,method:'',tracking:'',round:round,status:'Sent',outcome:''};
+  person().letters.push(entry);save();toast('Saved to Tracker');closeModal();go('tracker');
+}
+var STATUSES=['Drafted','Sent','Response received','Resolved — deleted','Resolved — corrected','Verified (escalate)','No response (escalate)'];
+function renderTracker(){
+  var wrap=document.getElementById('trackerTable');
+  if(person().letters.length===0){wrap.innerHTML='<div class="empty">No letters yet. Generate one and click "Save to Tracker."</div>';return;}
+  var rows=person().letters.slice().sort(function(a,b){return(b.dateSent||'').localeCompare(a.dateSent||'');});
+  var html='<table><tr><th>Sent</th><th>Letter</th><th>To</th><th>Re</th><th>Rnd</th><th>Tracking #</th><th>Deadline</th><th>Status</th><th></th></tr>';
+  rows.forEach(function(e){
+    var dl='';var badge='';
+    if(e.deadlineDays>0&&e.dateSent&&['Sent','Response received'].indexOf(e.status)>=0){
+      var due=addDaysISO(e.dateSent,e.deadlineDays);var left=daysBetween(todayISO(),due);
+      dl=fmtLong(due);
+      if(left<0)badge=' <span class="pill bad">OVERDUE '+(-left)+'d</span>';
+      else if(left<=5)badge=' <span class="pill warn">'+left+'d left</span>';
+      else badge=' <span class="pill gray">'+left+'d</span>';
+    }else if(e.deadlineDays===0){dl='<span style="color:var(--muted)">n/a</span>';}
+    html+='<tr>'
+      +'<td><input type="date" value="'+(e.dateSent||'')+'" onchange="updLetter(\''+e.id+'\',\'dateSent\',this.value)" style="font-size:12px;padding:5px"></td>'
+      +'<td style="max-width:200px">'+esc(e.name)+'</td>'
+      +'<td>'+esc(e.recipient)+'</td>'
+      +'<td style="max-width:150px">'+esc(e.itemRef)+'</td>'
+      +'<td>'+e.round+'</td>'
+      +'<td><input value="'+esc(e.tracking||'')+'" placeholder="USPS #" onchange="updLetter(\''+e.id+'\',\'tracking\',this.value)" style="font-size:12px;padding:5px;width:120px"></td>'
+      +'<td style="white-space:nowrap">'+dl+badge+'</td>'
+      +'<td><select onchange="updLetter(\''+e.id+'\',\'status\',this.value)" style="font-size:12px;padding:5px">'+STATUSES.map(function(s){return'<option'+(s===e.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select></td>'
+      +'<td><button class="btn danger sm" onclick="delLetter(\''+e.id+'\')">✕</button></td>'
+      +'</tr>';
+    var hint=nextStepHint(e);
+    if(hint)html+='<tr><td colspan="9" style="padding-top:0;border-bottom:1px solid var(--line)"><div class="note" style="margin:0 0 8px">👉 '+hint+'</div></td></tr>';
+  });
+  html+='</table>';
+  wrap.innerHTML=html;
+}
+function nextStepHint(e){
+  if(e.status==='Verified (escalate)')return'Item came back "verified" — send a <b>Method of Verification demand</b>, then a <b>direct furnisher dispute</b>, and consider a <b>CFPB complaint</b>.';
+  if(e.status==='No response (escalate)')return'No response — send the <b>"30 days, demand deletion"</b> letter and file a <b>CFPB complaint</b>.';
+  if(e.deadlineDays>0&&e.dateSent&&['Sent','Response received'].indexOf(e.status)>=0){var due=addDaysISO(e.dateSent,e.deadlineDays);if(daysBetween(todayISO(),due)<0)return'Deadline passed. If you never got a real result, escalate now (demand deletion / CFPB complaint).';}
+  return'';
+}
+function updLetter(id,field,val){var e=person().letters.find(function(x){return x.id===id;});if(!e)return;e[field]=val;save();renderTracker();renderStats();}
+function delLetter(id){if(!confirm('Remove this letter from the tracker?'))return;person().letters=person().letters.filter(function(x){return x.id!==id;});save();renderTracker();renderStats();}
+
+/* ============================ STATS ============================ */
+function renderStats(){
+  document.getElementById('st-items').textContent=person().items.length;
+  document.getElementById('st-letters').textContent=person().letters.length;
+  var open=0,due=0;
+  person().letters.forEach(function(e){
+    if(['Sent','Response received'].indexOf(e.status)>=0){open++;if(e.deadlineDays>0&&e.dateSent){if(daysBetween(todayISO(),addDaysISO(e.dateSent,e.deadlineDays))<0)due++;}}
+    if(e.status==='Verified (escalate)'||e.status==='No response (escalate)')due++;
+  });
+  document.getElementById('st-open').textContent=open;
+  document.getElementById('st-due').textContent=due;
+}
+
+/* ============================ OVERVIEW / DASHBOARD ============================ */
+function normName(s){return(s||'').toUpperCase().replace(/[^A-Z0-9 ]/g,' ').replace(/\b(BANK|NA|LLC|INC|CORP|CO|COMPANY|SERVICES|SERVICING|FINANCIAL|FINANCE|CARD|USA|US|THE|OF|MGMT|MANAGEMENT|FUNDING|RECOVERY|GROUP)\b/g,' ').replace(/\b[A-Z]\b/g,' ').replace(/\s+/g,' ').trim();}
+function lastDigits(s){var m=(s||'').toString().replace(/[^0-9]/g,'');return m?m.slice(-4):'';}
+function numAmt(a){return parseFloat((a||'').toString().replace(/[^0-9.]/g,''))||0;}
+function priorityOf(it){
+  var base=({not_mine_fraud:100,collection:80,chargeoff:75,repossession:72,public_record:65,personal_info:60,account_late:50,inquiry:30,other:20})[it.category]||20;
+  if(it.accuracy==='inaccurate')base+=15;else if(it.accuracy==='unsure')base+=8;
+  base+=Math.min(numAmt(it.amount)/1000,10);
+  return {score:base,label:base>=80?'High':base>=55?'Medium':'Low',cls:base>=80?'bad':base>=55?'warn':'gray'};
+}
+function bureauDots(bs){bs=bs||[];return BKEYS.map(function(b){var on=bs.indexOf(b)>=0;var cls=b==='equifax'?'eq':b==='experian'?'ex':'tu';var lab=b==='equifax'?'EQ':b==='experian'?'EX':'TU';return on?'<span class="pill '+cls+'" title="'+BUREAUS[b].name+'">'+lab+' ✓</span>':'<span class="pill gray" style="opacity:.3" title="not reported on '+BUREAUS[b].name+'">'+lab+'</span>';}).join(' ');}
+function overviewInsights(items){
+  var tips=[];
+  var coll=items.filter(function(it){return it.category==='collection';}).length;
+  if(coll)tips.push('You have <b>'+coll+' collection'+(coll>1?'s':'')+'</b> — send a <b>debt-validation</b> letter FIRST and make them prove it before you dispute or pay.');
+  var fraud=items.filter(function(it){return it.category==='not_mine_fraud';}).length;
+  if(fraud)tips.push('<b>'+fraud+' item(s) marked not-yours</b> — file an FTC report at <a href="https://www.identitytheft.gov" target="_blank">IdentityTheft.gov</a> for a 4-business-day §605B block (the fastest removal).');
+  var all3=items.filter(function(it){return(it.bureaus||[]).length>=3;}).length;
+  if(all3)tips.push('<b>'+all3+' item(s) appear on all three bureaus</b> — dispute each with all three at once (the "Generate all Round-1" button prints one letter per bureau).');
+  var pi=items.filter(function(it){return it.category==='personal_info';}).length;
+  if(pi)tips.push('Fix the <b>wrong personal info first</b> — bad names/addresses are how accounts that aren\'t yours get mixed into your file.');
+  var gw=items.filter(function(it){return it.accuracy==='accurate'&&(it.category==='account_late'||it.category==='chargeoff');}).length;
+  if(gw)tips.push('<b>'+gw+' accurate item(s)</b> can\'t be disputed — use a <b>goodwill letter</b> instead (it\'s the legitimate option there).');
+  var old=items.filter(function(it){return it.dofd && (new Date().getFullYear()-parseInt((it.dofd||'').slice(0,4),10))>=7;}).length;
+  if(old)tips.push('<b>'+old+' item(s) look 7+ years old</b> — they may be past the legal reporting limit; use the "obsolete item" letter.');
+  tips.push('Always mail <b>certified with return receipt</b>, dispute one item per letter, and keep copies of everything.');
+  return tips;
+}
+function renderOverview(){
+  var w=document.getElementById('ovWho');if(w)w.textContent=person().label;
+  var box=document.getElementById('ovBody');if(!box)return;
+  var items=person().items.slice();
+  if(!items.length){box.innerHTML='<div class="card empty">Nothing here yet. Go to <b>Negative Items</b> → paste your credit report → <b>Scan</b>, and everything will appear here — sorted, deduped, and ready to act on.</div>';return;}
+  items.sort(function(a,b){return priorityOf(b).score-priorityOf(a).score;});
+  var per={equifax:0,experian:0,transunion:0},money=0,high=0;
+  items.forEach(function(it){(it.bureaus||[]).forEach(function(b){if(per[b]!=null)per[b]++;});if(['collection','chargeoff','repossession'].indexOf(it.category)>=0)money+=numAmt(it.amount);if(priorityOf(it).label==='High')high++;});
+  var disp=items.filter(function(it){return it.accuracy!=='accurate';}).length;
+  var cards='<div class="stat" style="margin-bottom:14px">'
+    +'<div class="s"><b>'+items.length+'</b><span>negative items</span></div>'
+    +'<div class="s"><b style="color:#9a4516">'+per.equifax+'</b><span>on Equifax</span></div>'
+    +'<div class="s"><b style="color:#1d5a8a">'+per.experian+'</b><span>on Experian</span></div>'
+    +'<div class="s"><b style="color:#1f7a47">'+per.transunion+'</b><span>on TransUnion</span></div>'
+    +'</div>'
+    +'<div class="stat" style="margin-bottom:16px">'
+    +'<div class="s"><b>$'+money.toLocaleString()+'</b><span>in collections / charge-offs</span></div>'
+    +'<div class="s"><b style="color:var(--bad)">'+high+'</b><span>high priority</span></div>'
+    +'<div class="s"><b style="color:var(--teal-d)">'+disp+'</b><span>disputable</span></div>'
+    +'<div class="s"><b>'+(items.length-disp)+'</b><span>goodwill only</span></div>'
+    +'</div>';
+  var ins='<div class="card"><h3 style="margin-top:0">💡 Smart suggestions</h3><ul class="clean">'+overviewInsights(items).map(function(t){return'<li>'+t+'</li>';}).join('')+'</ul></div>';
+  var batch='<div class="card" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;border:2px solid var(--teal)"><b>⚡ One-click:</b><button class="btn" onclick="generateRound1()">🖨 Generate all Round-1 bureau letters</button><span style="color:var(--muted);font-size:13px">Builds a dispute for every disputable item, on every bureau it appears — all in one printable batch.</span></div>';
+  var rows=items.map(function(it){
+    var p=priorityOf(it),steps=recommendFor(it),step=steps[0],L=step?LETTERS[step.id]:null;
+    return '<tr>'
+      +'<td><span class="pill '+p.cls+'">'+p.label+'</span></td>'
+      +'<td><b>'+esc(it.creditor)+'</b>'+(it.account?'<div style="color:var(--muted);font-size:12px">'+esc(it.account)+'</div>':'')+'</td>'
+      +'<td><span class="pill gray">'+CATLABEL[it.category]+'</span></td>'
+      +'<td style="white-space:nowrap">'+bureauDots(it.bureaus)+'</td>'
+      +'<td style="white-space:nowrap">'+(it.amount?'$'+esc(it.amount):'—')+'</td>'
+      +'<td style="max-width:230px">'+(step?'<b style="font-size:12.5px">'+esc(L.name.split('(')[0].trim())+'</b><div style="color:var(--muted);font-size:11.5px">'+esc(step.note)+'</div>':'—')+'</td>'
+      +'<td>'+(step?'<button class="btn ghost sm" onclick="quickGen(\''+it.id+'\',\''+step.id+'\')">Generate ✍️</button>':'')+'</td>'
+      +'</tr>';
+  }).join('');
+  var matrix='<div class="card" style="overflow-x:auto"><h3 style="margin-top:0">Your items — by priority &amp; bureau</h3><table><tr><th>Priority</th><th>Creditor</th><th>Type</th><th>EQ&nbsp;/&nbsp;EX&nbsp;/&nbsp;TU</th><th>Amount</th><th>Recommended first step</th><th></th></tr>'+rows+'</table><div style="margin-top:8px;color:var(--muted);font-size:12px">✓ = item is reported on that bureau · faded = not reported there. Edit any item on the <b>Negative Items</b> tab.</div></div>';
+  box.innerHTML=cards+ins+batch+matrix;
+}
+function generateRound1(){
+  var CLEAN=['bureau_dispute','bureau_obsolete'];var parts=[],n=0;
+  person().items.forEach(function(it){
+    var steps=recommendFor(it),step=null;
+    for(var i=0;i<steps.length;i++){if(CLEAN.indexOf(steps[i].id)>=0){step=steps[i];break;}}
+    if(!step)return;var L=LETTERS[step.id];var bs=(it.bureaus&&it.bureaus.length)?it.bureaus:BKEYS;
+    bs.forEach(function(b){parts.push(L.build({item:it,bureau:b,reason:defaultReason(it)}));n++;});
+  });
+  if(!n){toast('These items use collector/creditor letters — generate those from the table.');return;}
+  var pseudo={name:'Round 1 — '+n+' bureau letter(s)',cat:'Bureau',recipient:'bureau',needs:[]};
+  currentLetter={id:'round1',text:parts.join(PB),meta:{recipient:'bureau',bureau:'all',item:null,deadlineDays:30,name:pseudo.name}};
+  openModal(pseudo,parts.join(PB));
+}
+
+/* ============================ RESOURCES ============================ */
+function renderResources(){
+  var wrap=document.getElementById('bureauCards');
+  wrap.innerHTML=BKEYS.map(function(k){var B=BUREAUS[k];var cls=k==='equifax'?'eq':k==='experian'?'ex':'tu';
+    return'<div class="card"><span class="pill '+cls+'">'+B.name+'</span><h3 style="margin:10px 0 6px">Mail disputes to:</h3><div style="font-family:ui-monospace,monospace;font-size:13px;white-space:pre-line;background:#f7fafc;padding:10px;border-radius:8px">'+B.addr+'</div><p style="margin:10px 0 4px"><b>Phone:</b> '+B.phone+'</p><p style="margin:4px 0"><a href="'+B.freeze+'" target="_blank">Freeze your credit →</a></p></div>';
+  }).join('');
+}
+
+/* ============================ BACKUP / RESET ============================ */
+function exportData(){var blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='credit-toolkit-backup-'+todayISO()+'.json';a.click();toast('Backup downloaded');}
+function importData(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{DATA=normalize(JSON.parse(r.result));save();refreshAll();toast('Backup restored');go('start');}catch(e){toast('That file could not be read');}};r.readAsText(f);ev.target.value='';}
+function resetAll(){if(!confirm('This erases ALL data for EVERYONE on this device (all people, items, letters). Export a backup first if you want to keep it. Continue?'))return;localStorage.removeItem(KEY);DATA=defaultData();refreshAll();toast('All data cleared');go('start');}
+
+/* ============================ REPORT IMPORT / PARSER ============================ */
+var CAT_OPTS=[['collection','Collection'],['chargeoff','Charge-off'],['account_late','Late payments'],['repossession','Repossession'],['public_record','Public record'],['inquiry','Hard inquiry'],['not_mine_fraud','Not mine / fraud'],['personal_info','Personal info'],['other','Other']];
+function catOptions(sel){return CAT_OPTS.map(function(o){return'<option value="'+o[0]+'"'+(o[0]===sel?' selected':'')+'>'+o[1]+'</option>';}).join('');}
+function parseReport(text){
+  if(!text)return[];
+  var NEG=[
+    {re:/charge[\s-]?off|charged[\s-]?off|profit and loss|written off|write[\s-]?off|bad debt/i,cat:'chargeoff'},
+    {re:/collection|placed for collection|in collections|assigned to collection/i,cat:'collection'},
+    {re:/repossess|repossession|voluntary surrender/i,cat:'repossession'},
+    {re:/foreclos|bankruptc|judgment|tax lien|civil claim|public record/i,cat:'public_record'},
+    {re:/\b(30|60|90|120|150|180)\b[\s-]*(days?)?[\s-]*(late|past[\s-]?due|delinquent)|past[\s-]?due|delinquen|late payment|paid late|was late|pays?t? 30|major derogatory|derogatory/i,cat:'account_late'},
+    {re:/settled|settlement accepted|paid for less|paid charge[\s-]?off|legally paid in full for less/i,cat:'account_late'}
+  ];
+  var lines=text.split(/\r?\n/);
+  var amtRe=/\$\s?([\d,]{2,})(?:\.\d{2})?/;
+  var acctRe=/(?:acct|account)\s*#?\s*[:]?\s*([xX*\d][xX*\d-]{3,})|\b([xX*]{2,}\d{2,6})\b/i;
+  var cands=[];
+  var GOOD=/good standing|paid as agreed|never late|current\b|pays account as agreed|exceptional|closed\/?paid|paid\/?closed/i;
+  for(var i=0;i<lines.length;i++){
+    var ln=(lines[i]||'').trim();
+    if(ln.length<4)continue;
+    var cat=null;
+    for(var k=0;k<NEG.length;k++){if(NEG[k].re.test(ln)){cat=NEG[k].cat;break;}}
+    if(!cat)continue;
+    if(GOOD.test(ln)&&cat==='account_late')continue; // skip "current/never late" positives
+    var ctx=lines.slice(Math.max(0,i-3),i+2).join('  ');
+    var amt=((ctx.match(amtRe)||[])[1]||'').replace(/,/g,'');
+    var acctM=ctx.match(acctRe);var acct=acctM?(acctM[1]||acctM[2]||''):'';
+    var cred='';
+    for(var j=i;j>=Math.max(0,i-5);j--){
+      var c=(lines[j]||'').trim();
+      if(c&&/[A-Za-z]{3,}/.test(c)&&c.length<=42&&!/\$|\d{5,}|date|balance|status|account|payment|reported|condition|responsibility|remarks|high credit|credit limit|past due|terms|opened|closed|type|\bdays\b/i.test(c)){cred=c;break;}
+    }
+    cands.push({creditor:cred,account:acct,amount:amt,category:cat,snippet:ln.slice(0,170)});
+  }
+  var seen={},out=[];
+  cands.forEach(function(c){var key=((c.creditor||'')+'|'+c.snippet).toLowerCase();if(!seen[key]){seen[key]=1;out.push(c);}});
+  return out.slice(0,80);
+}
+function importReportFile(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var t=r.result||'';if(/\.html?$/i.test(f.name)||/<[a-z][\s\S]*>/i.test(t.slice(0,500))){t=t.replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<\/(tr|div|p|li|table|h[1-6])>/gi,'\n').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&');}document.getElementById('imp_text').value=t;toast('Loaded '+f.name+' — now click Scan');};r.readAsText(f);ev.target.value='';}
+function scanReport(){
+  var text=document.getElementById('imp_text').value;
+  var box=document.getElementById('imp_results');
+  if(!text.trim()){box.innerHTML='<div class="note warn">Paste your report text (or upload a file) first.</div>';return;}
+  var cands=parseReport(text);window.__scan=cands;
+  if(!cands.length){box.innerHTML='<div class="note warn">No obvious negative items detected automatically. Your report format may be unusual — try pasting a different section, or add items manually below.</div>';return;}
+  var rows=cands.map(function(c,idx){
+    return '<tr>'
+      +'<td><input type="checkbox" class="imp_chk" data-i="'+idx+'" checked style="width:auto"></td>'
+      +'<td><input class="imp_cred" data-i="'+idx+'" value="'+escAttr(c.creditor)+'" placeholder="creditor name" style="min-width:150px"></td>'
+      +'<td><select class="imp_cat" data-i="'+idx+'">'+catOptions(c.category)+'</select></td>'
+      +'<td><input class="imp_amt" data-i="'+idx+'" value="'+escAttr(c.amount)+'" style="width:80px"></td>'
+      +'<td><input class="imp_acct" data-i="'+idx+'" value="'+escAttr(c.account)+'" style="width:110px"></td>'
+      +'<td style="font-size:11px;color:var(--muted);max-width:260px">'+esc(c.snippet)+'</td>'
+      +'</tr>';
+  }).join('');
+  box.innerHTML='<div class="note good">Found <b>'+cands.length+'</b> possible negative item(s). Fix any creditor names, uncheck what you don\'t want, then add. You can edit everything later.</div>'
+    +'<div style="overflow-x:auto"><table><tr><th>Add</th><th>Creditor</th><th>Type</th><th>Amount</th><th>Account</th><th>Matched text</th></tr>'+rows+'</table></div>'
+    +'<button class="btn" style="margin-top:12px" onclick="addScanned()">➕ Add checked items to '+esc(person().label)+'</button>';
+}
+function findExistingItem(list,cand){
+  var nc=normName(cand.creditor),acc=lastDigits(cand.account),i,it;
+  // Strongest signal: same last-4 account number + same category (handles different name spellings across bureaus)
+  if(acc){for(i=0;i<list.length;i++){it=list[i];if(lastDigits(it.account)===acc&&it.category===cand.category)return it;}}
+  // Otherwise: same normalized creditor name + same category + compatible amount
+  for(i=0;i<list.length;i++){it=list[i];if(normName(it.creditor)===nc&&it.category===cand.category&&(!cand.amount||!it.amount||it.amount===cand.amount))return it;}
+  return null;
+}
+function addScanned(){
+  var bsel=document.getElementById('imp_bureau').value;
+  var bureaus=bsel==='all'?['equifax','experian','transunion']:[bsel];
+  var chks=document.querySelectorAll('.imp_chk');var added=0,merged=0;
+  Array.prototype.forEach.call(chks,function(chk){
+    if(!chk.checked)return;
+    var i=chk.getAttribute('data-i');
+    var get=function(cls){var el=document.querySelector(cls+'[data-i="'+i+'"]');return el?el.value.trim():'';};
+    var snip=(window.__scan&&window.__scan[i])?window.__scan[i].snippet:'';
+    var cand={creditor:get('.imp_cred')||'(unnamed — please edit)',account:get('.imp_acct'),category:get('.imp_cat')||'collection',amount:get('.imp_amt')};
+    var ex=findExistingItem(person().items,cand);
+    if(ex){bureaus.forEach(function(b){if(ex.bureaus.indexOf(b)<0)ex.bureaus.push(b);});if(!ex.account&&cand.account)ex.account=cand.account;if(!ex.amount&&cand.amount)ex.amount=cand.amount;merged++;}
+    else{person().items.push({id:uid(),creditor:cand.creditor,account:cand.account,category:cand.category,accuracy:'unsure',amount:cand.amount,dateOpened:'',dofd:'',status:'',bureaus:bureaus.slice(),notes:'Auto-imported from report. Matched: '+snip});added++;}
+  });
+  save();renderItems();renderOverview();renderStats();
+  document.getElementById('imp_text').value='';
+  toast(added+' added'+(merged?', '+merged+' merged':'')+' — see Overview');
+  go('overview');
+}
+
+/* ============================ AI UPLOAD (OpenAI) ============================ */
+function aiKey(){var f=document.getElementById('ai_key');var k=f&&f.value.trim();if(k){localStorage.setItem('crt_openai_key',k);return k;}return localStorage.getItem('crt_openai_key')||'';}
+function loadAiKey(){var f=document.getElementById('ai_key');if(f&&!f.value)f.value=localStorage.getItem('crt_openai_key')||'';}
+function setAiStatus(msg,kind){var el=document.getElementById('ai_status');if(el)el.innerHTML='<div class="note '+(kind||'')+'" style="margin:12px 0 0">'+msg+'</div>';}
+function redactSSN(t){return(t||'').replace(/\b\d{3}-\d{2}-\d{4}\b/g,'XXX-XX-XXXX').replace(/\b(ssn|social security)\b[:#\s]*\d{6,9}/gi,'$1: XXXXX');}
+function detectBureau(t){t=(t||'').toLowerCase();var c={equifax:(t.match(/equifax/g)||[]).length,experian:(t.match(/experian/g)||[]).length,transunion:(t.match(/trans\s?union/g)||[]).length};var best='',n=0;Object.keys(c).forEach(function(k){if(c[k]>n){n=c[k];best=k;}});return n?best:'';}
+function readTextFile(file){return new Promise(function(res){var fr=new FileReader();fr.onload=function(){var t=fr.result||'';if(/\.html?$/i.test(file.name)||/<[a-z][\s\S]*>/i.test(t.slice(0,400))){t=t.replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<\/(tr|div|p|li|table|h[1-6])>/gi,'\n').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ');}res(t);};fr.onerror=function(){res('');};fr.readAsText(file);});}
+function extractPdfText(file){return new Promise(function(res){var fr=new FileReader();fr.onload=function(){if(!window.pdfjsLib){res('');return;}try{pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}catch(e){}pdfjsLib.getDocument({data:new Uint8Array(fr.result)}).promise.then(function(pdf){var nums=[];for(var i=1;i<=pdf.numPages;i++)nums.push(i);var chunks=[];var seq=nums.reduce(function(pr,n){return pr.then(function(){return pdf.getPage(n).then(function(pg){return pg.getTextContent();}).then(function(tc){var lastY=null,line=[],lines=[];tc.items.forEach(function(it){var y=it.transform?it.transform[5]:null;if(lastY!==null&&y!==null&&Math.abs(y-lastY)>3){lines.push(line.join(' '));line=[];}line.push(it.str);lastY=y;});if(line.length)lines.push(line.join(' '));chunks.push(lines.join('\n'));});});},Promise.resolve());return seq.then(function(){res(chunks.join('\n'));});}).catch(function(){res('');});};fr.onerror=function(){res('');};fr.readAsArrayBuffer(file);});}
+function aiParseText(text,hint){
+  var key=aiKey();if(!key)return Promise.reject(new Error('Enter your OpenAI API key first.'));
+  var sys='You are a credit-report parser. From the report text, extract ONLY negative/adverse items a consumer would dispute: collections, charge-offs, accounts with late payments, repossessions, foreclosures, public records (bankruptcies, judgments, tax liens), and hard inquiries. SKIP positive accounts (paid as agreed, never late, current, in good standing, pays as agreed). Merge nothing; list each adverse account once. Return STRICT JSON only: {"items":[{"creditor":"name","account_last4":"digits or blank","type":"collection|chargeoff|account_late|repossession|public_record|inquiry|other","balance":"digits only or blank","date_opened":"YYYY-MM-DD or blank","dofd":"YYYY-MM-DD or blank","status":"short status","bureau":"equifax|experian|transunion or blank"}]}. If the bureau is not stated in the text, use the provided hint. Never invent items.';
+  var body={model:(localStorage.getItem('crt_ai_model')||'gpt-4o-mini'),temperature:0,response_format:{type:'json_object'},messages:[{role:'system',content:sys},{role:'user',content:'Bureau hint: '+(hint||'unknown')+'\n\nREPORT TEXT:\n'+redactSSN(text).slice(0,180000)}]};
+  return fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(j){if(j.error)throw new Error(j.error.message||'OpenAI API error');var c=j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;if(!c)throw new Error('Empty AI response');var data=JSON.parse(c);return data.items||[];});
+}
+function aiIngest(ev){
+  var files=ev.target.files;if(!files||!files.length)return;
+  if(!aiKey()){setAiStatus('Please enter your OpenAI API key in the field above first.','warn');ev.target.value='';return;}
+  var arr=Array.prototype.slice.call(files),added=0,merged=0,errs=[];
+  setAiStatus('⏳ Reading '+arr.length+' file(s)… this can take 10–30 seconds per report.','');
+  var seq=arr.reduce(function(pr,file){return pr.then(function(){
+    setAiStatus('⏳ Processing <b>'+esc(file.name)+'</b>…','');
+    var getText=/\.pdf$/i.test(file.name)?extractPdfText(file):readTextFile(file);
+    return getText.then(function(text){
+      if(!text||text.length<40){errs.push(esc(file.name)+': couldn\'t read text (scanned image PDF?)');return;}
+      var hint=detectBureau(text);
+      return aiParseText(text,hint).then(function(items){
+        items.forEach(function(it){
+          var cat=it.type||'other';var bur=it.bureau||hint;var bureaus=bur?[bur]:['equifax','experian','transunion'];
+          var cand={creditor:it.creditor||'(unnamed)',account:it.account_last4||'',category:cat,amount:(it.balance||'').toString().replace(/[^0-9]/g,'')};
+          var ex=findExistingItem(person().items,cand);
+          if(ex){bureaus.forEach(function(b){if(ex.bureaus.indexOf(b)<0)ex.bureaus.push(b);});if(!ex.amount&&cand.amount)ex.amount=cand.amount;if(!ex.dofd&&it.dofd)ex.dofd=it.dofd;if(!ex.dateOpened&&it.date_opened)ex.dateOpened=it.date_opened;merged++;}
+          else{person().items.push({id:uid(),creditor:cand.creditor,account:cand.account,category:cat,accuracy:'unsure',amount:cand.amount,dateOpened:it.date_opened||'',dofd:it.dofd||'',status:it.status||'',bureaus:bureaus,notes:'AI-imported from '+esc(file.name)+'.'});added++;}
+        });
+      });
+    }).catch(function(e){errs.push(esc(file.name)+': '+esc(e.message||'error'));});
+  });},Promise.resolve());
+  seq.then(function(){save();renderItems();renderOverview();renderStats();ev.target.value='';setAiStatus('✅ Done — <b>'+added+' added, '+merged+' merged</b>.'+(errs.length?'<br>Issues: '+errs.join('; '):''),errs.length?'warn':'good');toast(added+' added, '+merged+' merged');if(added||merged)setTimeout(function(){go('overview');},900);});
+}
+
+/* ============================ PEOPLE ============================ */
+function renderPersonSel(){var sel=document.getElementById('personSel');if(!sel)return;sel.innerHTML=DATA.people.map(function(p){return'<option value="'+p.id+'">'+esc(p.label)+'</option>';}).join('');sel.value=DATA.activePersonId;}
+function switchPerson(id){DATA.activePersonId=id;save();refreshAll();go('info');toast('Now editing: '+person().label);}
+function addPerson(){var n=prompt("Name for this person (e.g., your wife's first name):","");if(n===null)return;n=(n||'').trim()||('Person '+(DATA.people.length+1));var id=uid();DATA.people.push({id:id,label:n,profile:{},items:[],letters:[]});DATA.activePersonId=id;save();refreshAll();go('info');toast('Added '+n+' — now enter their info');}
+function renamePerson(){var p=person();var n=prompt('Rename this person:',p.label);if(n===null)return;p.label=(n||'').trim()||p.label;save();renderPersonSel();var w=document.getElementById('whoLabel');if(w)w.textContent=p.label;toast('Renamed');}
+function deletePerson(){if(DATA.people.length<=1){alert('You need at least one person. Add another first if you want to remove this one.');return;}var p=person();if(!confirm('Remove '+p.label+" and ALL of their info, items, and letters? This can't be undone. (Use Backup first if unsure.)"))return;DATA.people=DATA.people.filter(function(x){return x.id!==p.id;});DATA.activePersonId=DATA.people[0].id;save();refreshAll();go('info');toast('Removed');}
+function refreshAll(){renderPersonSel();resetItemForm();loadProfileForm();renderItems();renderOverview();renderStrategy();renderTracker();renderStats();renderLetterChoices();}
+
+/* ============================ INIT ============================ */
+buildTabs();renderPersonSel();loadProfileForm();renderResources();renderStats();renderLetterChoices();
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+go('start');
+</script>
+</body>
+</html>
