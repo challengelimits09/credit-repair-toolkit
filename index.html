@@ -26,6 +26,9 @@
   .hbtn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);
     padding:7px 12px;border-radius:8px;font-size:13px;cursor:pointer}
   .hbtn:hover{background:rgba(255,255,255,.22)}
+  .lang-tog{display:inline-flex;border:1px solid rgba(255,255,255,.35);border-radius:8px;overflow:hidden}
+  .lang-tog button{background:transparent;color:#fff;border:none;padding:7px 12px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.5px}
+  .lang-tog button.on{background:#fff;color:var(--navy)}
   .person-bar{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);padding:5px 8px;border-radius:10px;flex-wrap:wrap}
   .person-bar label{margin:0;color:#fff;font-size:12px;font-weight:800;white-space:nowrap}
   .person-bar select{padding:6px 8px;border-radius:7px;border:none;font-size:13px;font-weight:700;min-width:130px;color:var(--ink);background:#fff}
@@ -151,6 +154,7 @@
       <button class="hbtn" onclick="deletePerson()">Remove</button>
     </div>
     <div class="spacer"></div>
+    <div class="lang-tog"><button id="lng-en" onclick="setLang('en')">EN</button><button id="lng-es" onclick="setLang('es')">ES</button></div>
     <span class="privacy-badge">🔒 100% private — saved only in this browser</span>
     <button class="hbtn" onclick="exportData()">⬇ Backup</button>
     <button class="hbtn" onclick="document.getElementById('importFile').click()">⬆ Restore</button>
@@ -220,7 +224,7 @@
 
   <!-- MY INFO -->
   <section class="view" id="view-info">
-    <h1>My Information <span id="whoLabel" class="pill" style="background:var(--chip);color:var(--teal-d);font-size:14px;vertical-align:middle"></span></h1>
+    <h1><span>My Information</span> <span id="whoLabel" class="pill" style="background:var(--chip);color:var(--teal-d);font-size:14px;vertical-align:middle"></span></h1>
     <p class="sub">Entered once, then auto-filled into every letter for <b>this person only</b>. Use the <b>"Whose credit"</b> menu at the top to switch between people (e.g., you and your wife). Stored only in this browser on this device — nothing is uploaded anywhere.</p>
     <div class="note warn">For the SSN, the toolkit uses only the <b>last 4 digits</b> in letters by default (this is standard and safer). When you actually mail a dispute, enclose a photocopy of your ID and a utility bill — never email these.</div>
     <div class="card">
@@ -345,13 +349,13 @@
       <button class="btn ghost" id="itemCancel" onclick="resetItemForm()" style="display:none">Cancel edit</button>
     </div>
 
-    <h2>Your items <span class="badge-cnt" id="itemCount">0</span></h2>
+    <h2><span>Your items</span> <span class="badge-cnt" id="itemCount">0</span></h2>
     <div id="itemList"></div>
   </section>
 
   <!-- OVERVIEW -->
   <section class="view" id="view-overview">
-    <h1>📊 Overview <span id="ovWho" class="pill" style="background:var(--chip);color:var(--teal-d);font-size:14px;vertical-align:middle"></span></h1>
+    <h1><span>📊 Overview</span> <span id="ovWho" class="pill" style="background:var(--chip);color:var(--teal-d);font-size:14px;vertical-align:middle"></span></h1>
     <p class="sub">Everything sorted by priority, showing which bureau each item sits on and your recommended first move. Updates automatically as you import or edit items.</p>
     <div id="ovBody"></div>
   </section>
@@ -1027,18 +1031,18 @@ function bureauDots(bs){bs=bs||[];return BKEYS.map(function(b){var on=bs.indexOf
 function overviewInsights(items){
   var tips=[];
   var coll=items.filter(function(it){return it.category==='collection';}).length;
-  if(coll)tips.push('You have <b>'+coll+' collection'+(coll>1?'s':'')+'</b> — send a <b>debt-validation</b> letter FIRST and make them prove it before you dispute or pay.');
+  if(coll)tips.push(LX('You have <b>'+coll+' collection'+(coll>1?'s':'')+'</b> — send a <b>debt-validation</b> letter FIRST and make them prove it before you dispute or pay.','Tienes <b>'+coll+' cobranza'+(coll>1?'s':'')+'</b> — envía PRIMERO una carta de <b>validación de deuda</b> y haz que la prueben antes de disputar o pagar.'));
   var fraud=items.filter(function(it){return it.category==='not_mine_fraud';}).length;
-  if(fraud)tips.push('<b>'+fraud+' item(s) marked not-yours</b> — file an FTC report at <a href="https://www.identitytheft.gov" target="_blank">IdentityTheft.gov</a> for a 4-business-day §605B block (the fastest removal).');
+  if(fraud)tips.push(LX('<b>'+fraud+' item(s) marked not-yours</b> — file an FTC report at <a href="https://www.identitytheft.gov" target="_blank">IdentityTheft.gov</a> for a 4-business-day §605B block (the fastest removal).','<b>'+fraud+' ítem(s) marcados como no tuyos</b> — presenta un reporte de la FTC en <a href="https://www.identitytheft.gov" target="_blank">IdentityTheft.gov</a> para un bloqueo §605B en 4 días hábiles (la eliminación más rápida).'));
   var all3=items.filter(function(it){return(it.bureaus||[]).length>=3;}).length;
-  if(all3)tips.push('<b>'+all3+' item(s) appear on all three bureaus</b> — dispute each with all three at once (the "Generate all Round-1" button prints one letter per bureau).');
+  if(all3)tips.push(LX('<b>'+all3+' item(s) appear on all three bureaus</b> — dispute each with all three at once (the "Generate all Round-1" button prints one letter per bureau).','<b>'+all3+' ítem(s) aparecen en los tres burós</b> — disputa cada uno con los tres a la vez (el botón "Generar todas las cartas de la Ronda 1" imprime una carta por buró).'));
   var pi=items.filter(function(it){return it.category==='personal_info';}).length;
-  if(pi)tips.push('Fix the <b>wrong personal info first</b> — bad names/addresses are how accounts that aren\'t yours get mixed into your file.');
+  if(pi)tips.push(LX('Fix the <b>wrong personal info first</b> — bad names/addresses are how accounts that aren\'t yours get mixed into your file.','Corrige <b>primero los datos personales incorrectos</b> — los nombres/direcciones erróneos son la forma en que cuentas ajenas se mezclan en tu archivo.'));
   var gw=items.filter(function(it){return it.accuracy==='accurate'&&(it.category==='account_late'||it.category==='chargeoff');}).length;
-  if(gw)tips.push('<b>'+gw+' accurate item(s)</b> can\'t be disputed — use a <b>goodwill letter</b> instead (it\'s the legitimate option there).');
+  if(gw)tips.push(LX('<b>'+gw+' accurate item(s)</b> can\'t be disputed — use a <b>goodwill letter</b> instead (it\'s the legitimate option there).','<b>'+gw+' ítem(s) correctos</b> no se pueden disputar — usa una <b>carta de buena fe</b> en su lugar (es la opción legítima ahí).'));
   var old=items.filter(function(it){return it.dofd && (new Date().getFullYear()-parseInt((it.dofd||'').slice(0,4),10))>=7;}).length;
-  if(old)tips.push('<b>'+old+' item(s) look 7+ years old</b> — they may be past the legal reporting limit; use the "obsolete item" letter.');
-  tips.push('Always mail <b>certified with return receipt</b>, dispute one item per letter, and keep copies of everything.');
+  if(old)tips.push(LX('<b>'+old+' item(s) look 7+ years old</b> — they may be past the legal reporting limit; use the "obsolete item" letter.','<b>'+old+' ítem(s) parecen tener 7+ años</b> — quizá ya pasaron el límite legal de reporte; usa la carta de "ítem obsoleto".'));
+  tips.push(LX('Always mail <b>certified with return receipt</b>, dispute one item per letter, and keep copies of everything.','Envía siempre por <b>correo certificado con acuse de recibo</b>, disputa un ítem por carta y guarda copias de todo.'));
   return tips;
 }
 /* ---- SOTA: audit / leverage engine ---- */
@@ -1074,19 +1078,19 @@ function estimateScore(items){
 }
 function buildActionPlan(){
   var tasks=[],items=person().items,p=P();
-  if(!p.fullName||!p.address1||!p.ssnLast4)tasks.push({t:'Finish your info (name, address, SSN last-4) so letters are complete.',go:'info'});
+  if(!p.fullName||!p.address1||!p.ssnLast4)tasks.push({t:LX('Finish your info (name, address, SSN last-4) so letters are complete.','Completa tu información (nombre, dirección, últimos 4 del SSN) para que las cartas estén completas.'),go:'info'});
   var cols=items.filter(function(it){return it.category==='collection';});
-  if(cols.length)tasks.push({t:'Send Debt Validation to '+cols.length+' collector(s) — make them prove it before you dispute or pay.',go:'overview'});
+  if(cols.length)tasks.push({t:LX('Send Debt Validation to '+cols.length+' collector(s) — make them prove it before you dispute or pay.','Envía Validación de Deuda a '+cols.length+' cobrador(es) — haz que lo prueben antes de disputar o pagar.'),go:'overview'});
   var disp=items.filter(function(it){return it.accuracy!=='accurate'&&['chargeoff','collection','account_late','repossession','public_record'].indexOf(it.category)>=0;});
-  if(disp.length)tasks.push({t:'Generate & mail Round-1 disputes for '+disp.length+' item(s) — use "Generate all Round-1 bureau letters".',go:'overview'});
+  if(disp.length)tasks.push({t:LX('Generate & mail Round-1 disputes for '+disp.length+' item(s) — use "Generate all Round-1 bureau letters".','Genera y envía las disputas de la Ronda 1 para '+disp.length+' ítem(s) — usa "Generar todas las cartas de la Ronda 1".'),go:'overview'});
   var overdue=0,verified=0;
   person().letters.forEach(function(e){if(e.status==='Verified (escalate)')verified++;else if(e.status==='No response (escalate)')overdue++;else if(e.deadlineDays>0&&e.dateSent&&['Sent','Response received'].indexOf(e.status)>=0&&daysBetween(todayISO(),addDaysISO(e.dateSent,e.deadlineDays))<0)overdue++;});
-  if(verified)tasks.push({t:verified+' item(s) came back "verified" — send a Method-of-Verification demand and dispute the furnisher directly.',go:'tracker'});
-  if(overdue)tasks.push({t:overdue+' letter(s) are overdue — escalate: demand deletion + file a CFPB complaint.',go:'tracker'});
+  if(verified)tasks.push({t:LX(verified+' item(s) came back "verified" — send a Method-of-Verification demand and dispute the furnisher directly.',verified+' ítem(s) volvieron como "verificados" — envía una exigencia de Método de Verificación y disputa directo con el acreedor.'),go:'tracker'});
+  if(overdue)tasks.push({t:LX(overdue+' letter(s) are overdue — escalate: demand deletion + file a CFPB complaint.',overdue+' carta(s) están vencidas — escala: exige eliminación + presenta una queja al CFPB.'),go:'tracker'});
   var gw=items.filter(function(it){return it.accuracy==='accurate'&&(it.category==='account_late'||it.category==='chargeoff');});
-  if(gw.length)tasks.push({t:gw.length+' accurate item(s) — send a goodwill letter (these can\'t be disputed).',go:'overview'});
-  if(!localStorage.getItem('crt_freeze_done'))tasks.push({t:'Freeze your credit & opt out of junk offers to stop new damage.',go:'resources'});
-  if(!tasks.length)tasks.push({t:'You\'re on track — wait for responses and watch the Tracker for deadlines.',go:'tracker'});
+  if(gw.length)tasks.push({t:LX(gw.length+' accurate item(s) — send a goodwill letter (these can\'t be disputed).',gw.length+' ítem(s) correctos — envía una carta de buena fe (estos no se pueden disputar).'),go:'overview'});
+  if(!localStorage.getItem('crt_freeze_done'))tasks.push({t:LX('Freeze your credit & opt out of junk offers to stop new damage.','Congela tu crédito y cancela ofertas no solicitadas para detener nuevo daño.'),go:'resources'});
+  if(!tasks.length)tasks.push({t:LX('You\'re on track — wait for responses and watch the Tracker for deadlines.','Vas bien — espera respuestas y vigila las fechas límite en Seguimiento.'),go:'tracker'});
   return tasks;
 }
 
@@ -1299,10 +1303,119 @@ function renamePerson(){var p=person();var n=prompt('Rename this person:',p.labe
 function deletePerson(){if(DATA.people.length<=1){alert('You need at least one person. Add another first if you want to remove this one.');return;}var p=person();if(!confirm('Remove '+p.label+" and ALL of their info, items, and letters? This can't be undone. (Use Backup first if unsure.)"))return;DATA.people=DATA.people.filter(function(x){return x.id!==p.id;});DATA.activePersonId=DATA.people[0].id;save();refreshAll();go('info');toast('Removed');}
 function refreshAll(){renderPersonSel();resetItemForm();loadProfileForm();renderItems();renderOverview();renderStrategy();renderTracker();renderStats();renderLetterChoices();}
 
+/* ============================ I18N (English / Spanish) ============================ */
+var LANG=(function(){try{return localStorage.getItem('crt_lang')||'en';}catch(e){return'en';}})();
+function LX(en,es){return LANG==='es'?es:en;}
+function norm(s){return (s||'').replace(/\s+/g,' ').trim();}
+var _orig=new WeakMap(),_origPh=new WeakMap(),_obs=null,_pend=false;
+var ES={
+/* header + nav */
+'Dispute letters · strategy · tracking — all on your device':'Cartas de disputa · estrategia · seguimiento — todo en tu dispositivo',
+'👤 Whose credit:':'👤 Crédito de:','+ Add person':'+ Agregar persona','Rename':'Renombrar','Remove':'Quitar',
+'🔒 100% private — saved only in this browser':'🔒 100% privado — guardado solo en este navegador',
+'⬇ Backup':'⬇ Respaldo','⬆ Restore':'⬆ Restaurar','Reset':'Reiniciar',
+'Start Here':'Empezar aquí','My Info':'Mi información','Negative Items':'Ítems negativos','📊 Overview':'📊 Resumen','Strategy':'Estrategia','Generate Letters':'Generar cartas','Tracker':'Seguimiento','Know Your Rights':'Tus derechos','Resources':'Recursos',
+/* start */
+'Fix your credit the legal, methodical way.':'Repara tu crédito de forma legal y metódica.',
+"This toolkit helps you do exactly what paid credit-repair companies do — for free — by exercising your own rights under the Fair Credit Reporting Act (FCRA) and the Fair Debt Collection Practices Act (FDCPA). Enter your information once, list what's on your reports, and the toolkit builds the right letters, in the right order, and tracks every deadline.":'Esta herramienta hace exactamente lo que hacen las compañías de reparación de crédito de pago — gratis — ejerciendo tus derechos bajo la Ley de Informe Justo de Crédito (FCRA) y la Ley de Prácticas Justas de Cobro de Deudas (FDCPA). Ingresa tu información una vez, lista lo que aparece en tus reportes, y la herramienta crea las cartas correctas, en el orden correcto, y vigila cada fecha límite.',
+'negative items logged':'ítems negativos registrados','letters in tracker':'cartas en seguimiento','awaiting response':'esperando respuesta','overdue / escalate':'vencidas / escalar',
+'Your 7-step game plan':'Tu plan en 7 pasos',
+"<b>Pull all three reports (free, weekly).</b> Get Equifax, Experian &amp; TransUnion from <a href=\"https://www.annualcreditreport.com\" target=\"_blank\">AnnualCreditReport.com</a> — the only federally authorized free source. Reports are now free every week. (See <a href=\"#\" onclick=\"go('resources');return false\">Resources</a>.)":"<b>Saca los tres reportes (gratis, cada semana).</b> Obtén Equifax, Experian y TransUnion en <a href=\"https://www.annualcreditreport.com\" target=\"_blank\">AnnualCreditReport.com</a> — la única fuente gratuita autorizada por el gobierno federal. Ahora son gratis cada semana. (Ver <a href=\"#\" onclick=\"go('resources');return false\">Recursos</a>.)",
+"<b>Lock things down.</b> Freeze your credit at all three bureaus and opt out of prescreened offers — stops new fraud and junk inquiries while you work.":"<b>Asegura todo.</b> Congela tu crédito en los tres burós y cancela las ofertas preseleccionadas — detiene nuevo fraude y consultas basura mientras trabajas.",
+"<b>Enter your info &amp; list every negative item.</b> Go to <a href=\"#\" onclick=\"go('info');return false\">My Info</a>, then <a href=\"#\" onclick=\"go('items');return false\">Negative Items</a>. Add collections, charge-offs, late payments, wrong personal info, and unauthorized inquiries.":"<b>Ingresa tu información y lista cada ítem negativo.</b> Ve a <a href=\"#\" onclick=\"go('info');return false\">Mi información</a>, luego a <a href=\"#\" onclick=\"go('items');return false\">Ítems negativos</a>. Agrega cobranzas, cuentas canceladas, pagos atrasados, datos personales incorrectos y consultas no autorizadas.",
+"<b>Get your strategy.</b> The <a href=\"#\" onclick=\"go('strategy');return false\">Strategy</a> tab tells you exactly which letters to send for each item and in what order.":"<b>Obtén tu estrategia.</b> La pestaña <a href=\"#\" onclick=\"go('strategy');return false\">Estrategia</a> te dice exactamente qué cartas enviar para cada ítem y en qué orden.",
+"<b>Generate &amp; mail the letters.</b> The <a href=\"#\" onclick=\"go('letters');return false\">Letters</a> tab fills out 16 different professional letters with your details. <b>Always send by certified mail with return receipt.</b>":"<b>Genera y envía las cartas.</b> La pestaña <a href=\"#\" onclick=\"go('letters');return false\">Generar cartas</a> llena 16 cartas profesionales con tus datos. <b>Envía siempre por correo certificado con acuse de recibo.</b>",
+"<b>Track the clock.</b> Bureaus get 30 days to investigate. Log each letter in the <a href=\"#\" onclick=\"go('tracker');return false\">Tracker</a>; it calculates deadlines and tells you the next move.":"<b>Vigila el reloj.</b> Los burós tienen 30 días para investigar. Registra cada carta en <a href=\"#\" onclick=\"go('tracker');return false\">Seguimiento</a>; calcula las fechas límite y te dice el siguiente paso.",
+"<b>Escalate.</b> No response or a bogus \"verified\"? Send a Method-of-Verification demand, dispute with the furnisher directly, and file a CFPB complaint.":"<b>Escala.</b> ¿Sin respuesta o un \"verificado\" falso? Envía una exigencia de Método de Verificación, disputa directo con el acreedor y presenta una queja al CFPB.",
+"<b>Disclaimer.</b> This is a free, self-help educational tool that you operate yourself. It is <b>not</b> a credit-repair organization, law firm, or financial advisor, and it does not provide legal advice. It charges nothing and asks for no payment. Results are never guaranteed. The legal citations are provided for your reference; statutes and bureau addresses change — verify current details (see Resources) before mailing. For complex situations (lawsuits, bankruptcy, large identity theft), consult a consumer-protection attorney — many take FCRA/FDCPA cases at no cost to you because the law shifts fees to violators.":"<b>Aviso legal.</b> Esta es una herramienta educativa y de autoayuda, gratuita, que tú mismo operas. <b>No</b> es una organización de reparación de crédito, bufete de abogados ni asesor financiero, y no brinda asesoría legal. No cobra nada ni pide pago. Los resultados nunca están garantizados. Las citas legales son solo de referencia; las leyes y direcciones de los burós cambian — verifica los datos actuales (ver Recursos) antes de enviar. Para situaciones complejas (demandas, quiebra, robo de identidad grave), consulta a un abogado de protección al consumidor — muchos toman casos de FCRA/FDCPA sin costo para ti porque la ley traslada los honorarios a quien infringe.",
+'✅ What you CAN legally remove':'✅ Lo que SÍ puedes eliminar legalmente',
+'Information that is <b>inaccurate</b> (wrong balance, wrong dates, "late" when you paid on time)':'Información <b>inexacta</b> (saldo incorrecto, fechas incorrectas, "atraso" cuando pagaste a tiempo)',
+"Information that is <b>incomplete or unverifiable</b> — if the furnisher can't prove it, it must be deleted":'Información <b>incompleta o no verificable</b> — si el acreedor no puede probarla, deben eliminarla',
+"Accounts that <b>aren't yours</b> or resulted from identity theft":'Cuentas que <b>no son tuyas</b> o que resultaron de robo de identidad',
+'<b>Obsolete</b> items past the 7-year (or 10-year for Ch. 7 bankruptcy) limit':'Ítems <b>obsoletos</b> que pasaron el límite de 7 años (o 10 para quiebra Cap. 7)',
+'<b>Unauthorized hard inquiries</b> you never approved':'<b>Consultas duras no autorizadas</b> que nunca aprobaste',
+'Accurate late payments — via a <b>goodwill request</b> (the creditor\'s discretion)':'Atrasos reales — mediante una <b>carta de buena fe</b> (a discreción del acreedor)',
+"⛔ What this toolkit will NOT do (it's illegal)":'⛔ Lo que esta herramienta NO hará (es ilegal)',
+'<b>Disputing accurate information</b> with false statements — that\'s fraud.':'<b>Disputar información correcta</b> con declaraciones falsas — eso es fraude.',
+'<b>CPNs / "credit privacy numbers"</b> as SSN substitutes — federal identity fraud.':'<b>CPN / "números de privacidad de crédito"</b> como sustitutos del SSN — fraude de identidad federal.',
+'Creating a "new credit identity" or "file segregation."':'Crear una "nueva identidad de crédito" o "segregación de archivo".',
+'Promising a guaranteed score jump — no one can.':'Prometer un aumento garantizado del puntaje — nadie puede.',
+'Only dispute items you genuinely believe are inaccurate, incomplete, outdated, or unverifiable. That\'s both the legal path and the effective one.':'Solo disputa ítems que de verdad creas inexactos, incompletos, vencidos o no verificables. Ese es el camino legal y el más efectivo.',
+/* my info */
+'My Information':'Mi información',
+"Entered once, then auto-filled into every letter for <b>this person only</b>. Use the <b>\"Whose credit\"</b> menu at the top to switch between people (e.g., you and your wife). Stored only in this browser on this device — nothing is uploaded anywhere.":'Se ingresa una vez y se completa automáticamente en cada carta para <b>esta persona solamente</b>. Usa el menú <b>"Crédito de"</b> arriba para cambiar entre personas (por ej., tú y tu esposa). Se guarda solo en este navegador en este dispositivo — nada se sube a ningún lado.',
+'For the SSN, the toolkit uses only the <b>last 4 digits</b> in letters by default (this is standard and safer). When you actually mail a dispute, enclose a photocopy of your ID and a utility bill — never email these.':'Para el SSN, la herramienta usa solo los <b>últimos 4 dígitos</b> en las cartas (es lo estándar y más seguro). Cuando envíes una disputa por correo, incluye una copia de tu identificación y un recibo de servicios — nunca los mandes por email.',
+'Full legal name *':'Nombre legal completo *','Former names / maiden name (if any)':'Nombres anteriores / apellido de soltera (si aplica)','Date of birth':'Fecha de nacimiento','SSN — last 4 digits':'SSN — últimos 4 dígitos','Current mailing address':'Dirección postal actual','Street address *':'Dirección (calle) *','Apt / Unit':'Apto / Unidad','City *':'Ciudad *','State *':'Estado *','ZIP *':'Código postal *','Phone':'Teléfono','Email':'Correo electrónico','Previous addresses (last 2 years) — helps fix "mixed file" errors':'Direcciones anteriores (últimos 2 años) — ayuda a corregir errores de "archivo mezclado"','💾 Save my information':'💾 Guardar mi información','Saved ✓':'Guardado ✓',
+/* items */
+'List everything questionable on your reports. Be precise — the account number and dates as shown on the report make your disputes stronger.':'Lista todo lo cuestionable en tus reportes. Sé preciso — el número de cuenta y las fechas tal como aparecen hacen tus disputas más fuertes.',
+'⚡ Fastest: upload your report PDF(s) — AI fills in everything':'⚡ Lo más rápido: sube tu(s) PDF de reporte — la IA llena todo',
+'Drop in your downloaded report PDF(s) and AI reads them and auto-creates your items (creditor, balance, dates, status, and which bureau). Your <b>SSN is stripped out before anything is sent</b>, and your API key is saved only on this device.':'Sube tu(s) PDF de reporte descargados y la IA los lee y crea tus ítems automáticamente (acreedor, saldo, fechas, estado y en qué buró). Tu <b>SSN se elimina antes de enviar nada</b>, y tu clave API se guarda solo en este dispositivo.',
+'OpenAI API key <span style="font-weight:400">(saved on this device only)</span>':'Clave API de OpenAI <span style="font-weight:400">(guardada solo en este dispositivo)</span>',
+'Upload report file(s) — PDF, or TXT/HTML':'Subir archivo(s) de reporte — PDF, o TXT/HTML',
+"Tip: you can select all 3 bureau PDFs at once. Cost is about half a cent per report. Don't have a key? Use the free manual options below.":'Consejo: puedes seleccionar los 3 PDF de los burós a la vez. Cuesta como medio centavo por reporte. ¿No tienes clave? Usa las opciones manuales gratis de abajo.',
+'① Get your reports — free':'① Obtén tus reportes — gratis',
+"A private tool can't silently pull your credit (the bureaus make <i>you</i> log in and verify your identity — there's no free auto-pull). But this is the fast, free, official way, and the next step does the heavy lifting for you.":'Una herramienta privada no puede jalar tu crédito en silencio (los burós te hacen <i>a ti</i> iniciar sesión y verificar tu identidad — no hay extracción automática gratis). Pero esta es la forma rápida, gratis y oficial, y el siguiente paso hace el trabajo pesado por ti.',
+'🔗 Open AnnualCreditReport.com — all 3 bureaus, free weekly':'🔗 Abrir AnnualCreditReport.com — los 3 burós, gratis cada semana',
+'② Import without AI — paste report text (free, less accurate)':'② Importar sin IA — pega el texto del reporte (gratis, menos preciso)',
+'This report is from':'Este reporte es de','Or upload a saved report file (.txt, .html, .csv)':'O sube un archivo de reporte guardado (.txt, .html, .csv)','Paste your full credit report text here':'Pega aquí el texto completo de tu reporte de crédito','🔎 Scan for negative items':'🔎 Buscar ítems negativos',
+'All three (or not sure)':'Los tres (o no estoy seguro)',
+'Add an item':'Agregar un ítem','Creditor / furnisher / collector name *':'Nombre del acreedor / informante / cobrador *','Account number (as shown on report)':'Número de cuenta (como aparece en el reporte)','Item type *':'Tipo de ítem *','Is the information accurate? *':'¿La información es correcta? *','Amount ($)':'Monto ($)','Date opened':'Fecha de apertura','Date of first delinquency (DOFD)':'Fecha de primer atraso (DOFD)','Current status':'Estado actual','Appears on which reports? *':'¿Aparece en cuáles reportes? *','Notes (what\'s wrong, the story, anything useful)':'Notas (qué está mal, la historia, lo que sea útil)','➕ Save item':'➕ Guardar ítem','Cancel edit':'Cancelar edición',
+'Collection account':'Cuenta en cobranza','Charge-off':'Cuenta cancelada (charge-off)','Account with late payments':'Cuenta con pagos atrasados','Not mine / identity theft':'No es mía / robo de identidad','Unauthorized hard inquiry':'Consulta dura no autorizada','Public record (judgment/bankruptcy)':'Registro público (fallo/quiebra)','Wrong personal info (name/address)':'Datos personales incorrectos (nombre/dirección)','Repossession':'Embargo (repossession)','Other':'Otro',
+"No — it's inaccurate / not mine":'No — es inexacta / no es mía',"Not sure / can't verify it":'No estoy seguro / no la puedo verificar','Yes — it\'s accurate':'Sí — es correcta',
+/* overview / dynamic labels */
+'negative items':'ítems negativos','on Equifax':'en Equifax','on Experian':'en Experian','on TransUnion':'en TransUnion','in collections / charge-offs':'en cobranzas / cancelados','high priority':'prioridad alta','disputable':'disputables','goodwill only':'solo buena fe','EST. SCORE NOW':'PUNTAJE EST. AHORA','POTENTIAL AFTER CLEANUP':'POTENCIAL TRAS LIMPIEZA',
+'✅ What to do now':'✅ Qué hacer ahora','💡 Smart suggestions':'💡 Sugerencias inteligentes',
+'Your items — by priority &amp; bureau':'Tus ítems — por prioridad y buró','Priority':'Prioridad','Creditor':'Acreedor','Type':'Tipo','Amount':'Monto','🔬 Leverage / errors':'🔬 Ventaja / errores','Recommended first step':'Primer paso recomendado','Generate ✍️':'Generar ✍️',
+'High':'Alta','Medium':'Media','Low':'Baja',
+'Collection':'Cobranza','Charge-off':'Cuenta cancelada','Late payments':'Pagos atrasados','Not mine / fraud':'No es mía / fraude','Hard inquiry':'Consulta dura','Public record':'Registro público','Personal info':'Datos personales',
+'RECOMMENDED:':'RECOMENDADO:','Your items':'Tus ítems',
+'No items yet. Add the negative items from your credit reports above, and your strategy will appear automatically.':'Aún no hay ítems. Agrega arriba los ítems negativos de tus reportes y tu estrategia aparecerá sola.',
+'Add your negative items first — then a tailored, step-by-step plan appears here for each one.':'Agrega primero tus ítems negativos — luego aparecerá aquí un plan paso a paso para cada uno.',
+'Nothing here yet. Go to <b>Negative Items</b> → paste your credit report → <b>Scan</b>, and everything will appear here — sorted, deduped, and ready to act on.':'Aún no hay nada. Ve a <b>Ítems negativos</b> → pega tu reporte → <b>Buscar</b>, y todo aparecerá aquí — ordenado, sin duplicados y listo para actuar.',
+'No letters yet. Generate one and click "Save to Tracker."':'Aún no hay cartas. Genera una y haz clic en "Guardar en Seguimiento."',
+'accurate':'correcta','unverified':'sin verificar','inaccurate':'inexacta',
+'Status differs across bureaus':'Estado distinto entre burós','Balance differs across bureaus':'Saldo distinto entre burós','First-delinquency date differs':'Fecha de primer atraso distinta','Balance on a charge-off':'Saldo en cuenta cancelada','Possible re-aging':'Posible "re-aging" (re-envejecido)','No DOFD reported':'Sin DOFD reportada','Validate first':'Validar primero',
+'Edit':'Editar','Delete':'Borrar',
+'⚡ One-click:':'⚡ Un clic:','🖨 Generate all Round-1 bureau letters':'🖨 Generar todas las cartas de la Ronda 1','Builds a dispute for every disputable item, on every bureau it appears — all in one printable batch.':'Crea una disputa para cada ítem disputable, en cada buró donde aparece — todo en un lote para imprimir.',
+'Rough estimate of relative impact — NOT a real FICO score. Your true score also depends on utilization, account age, and positive history.':'Estimación aproximada del impacto relativo — NO es un puntaje FICO real. Tu puntaje real también depende del uso de crédito, la antigüedad de las cuentas y el historial positivo.',
+'✓ = item is reported on that bureau · faded = not reported there. Edit any item on the <b>Negative Items</b> tab.':'✓ = el ítem se reporta en ese buró · atenuado = no se reporta ahí. Edita cualquier ítem en la pestaña <b>Ítems negativos</b>.',
+'Everything sorted by priority, showing which bureau each item sits on and your recommended first move. Updates automatically as you import or edit items.':'Todo ordenado por prioridad, mostrando en qué buró está cada ítem y tu primer paso recomendado. Se actualiza solo al importar o editar ítems.',
+/* strategy */
+'Your Strategy':'Tu estrategia',
+'For each item, here\'s the recommended sequence of letters. Work top-to-bottom; wait for the deadline before escalating. Click any step to generate that letter pre-filled.':'Para cada ítem, esta es la secuencia recomendada de cartas. Ve de arriba hacia abajo; espera la fecha límite antes de escalar. Haz clic en cualquier paso para generar esa carta ya llena.',
+/* letters */
+'Generate a Letter':'Generar una carta',
+'Pick a letter; the toolkit fills in your details and the disputed item. You can edit the text before printing.':'Elige una carta; la herramienta llena tus datos y el ítem disputado. Puedes editar el texto antes de imprimir.',
+'1. What do you need?':'1. ¿Qué necesitas?','2. Choose the letter':'2. Elige la carta','Show all letters':'Mostrar todas las cartas','Letters to the credit bureaus':'Cartas a los burós de crédito','Letters to the creditor / furnisher':'Cartas al acreedor / informante','Letters to a debt collector':'Cartas a un cobrador','Complaints &amp; other':'Quejas y otros','✍️ Generate letter':'✍️ Generar carta',
+'I have a good-faith belief that this information is inaccurate, incomplete, outdated, or unverifiable. I am not disputing information I know to be accurate.':'Creo de buena fe que esta información es inexacta, incompleta, vencida o no verificable. No estoy disputando información que sé que es correcta.',
+/* tracker */
+'Letter Tracker &amp; Deadlines':'Seguimiento de cartas y fechas límite',
+'Every letter you save lands here. The toolkit calculates the response deadline and flags what\'s overdue so nothing slips.':'Cada carta que guardas aparece aquí. La herramienta calcula la fecha límite de respuesta y marca lo vencido para que nada se te pase.',
+'Sent &amp; pending letters':'Cartas enviadas y pendientes','+ Generate a new letter':'+ Generar una carta nueva',
+'Sent':'Enviada','Letter':'Carta','To':'Para','Re':'Ref','Rnd':'Ronda','Tracking #':'N.º de rastreo','Deadline':'Fecha límite','Status':'Estado',
+/* learn */
+'Know Your Rights':'Conoce tus derechos','The laws that make all of this work — in plain English. Citing them correctly is what gets results.':'Las leyes que hacen que todo esto funcione — en lenguaje sencillo. Citarlas bien es lo que da resultados.',
+'The two laws on your side':'Las dos leyes de tu lado','Key FCRA sections you\'ll cite':'Secciones clave de la FCRA que citarás','Key FDCPA tools':'Herramientas clave de la FDCPA','How long do negative items last?':'¿Cuánto duran los ítems negativos?','Medical debt — the 2026 reality':'Deuda médica — la realidad en 2026','Dispute reasons that actually work (cheat sheet)':'Razones de disputa que sí funcionan (guía rápida)','Smart habits that build score while you dispute':'Hábitos inteligentes que suben tu puntaje mientras disputas',
+/* resources */
+'Resources &amp; Addresses':'Recursos y direcciones','Verified contacts. Mailing addresses for disputes differ from corporate HQ — these go to the right department.':'Contactos verificados. Las direcciones para disputas son distintas a las oficinas corporativas — estas llegan al departamento correcto.','Free credit reports':'Reportes de crédito gratis','Stop new damage':'Detén nuevo daño','File a complaint (free leverage)':'Presenta una queja (ventaja gratis)','Identity theft':'Robo de identidad','Free / low-cost human help':'Ayuda humana gratis / de bajo costo','Mail disputes to:':'Envía las disputas a:',
+/* modal */
+'Review and edit anything in brackets, then <b>print or copy</b>. Sign in ink. <b>Mail certified, return receipt requested</b>, and keep a copy.':'Revisa y edita lo que esté entre corchetes, luego <b>imprime o copia</b>. Firma con tinta. <b>Envía por correo certificado con acuse de recibo</b> y guarda una copia. (La carta va en inglés porque así la exigen los burós en EE. UU.)',
+'📋 Copy':'📋 Copiar','⬇ Download .txt':'⬇ Descargar .txt','🖨 Print / Save PDF':'🖨 Imprimir / Guardar PDF','✅ Save to Tracker':'✅ Guardar en Seguimiento'
+};
+var ES_PH={'Paste the whole report (Ctrl/Cmd+A to select all on the page, then copy). The more you paste, the more it finds.':'Pega el reporte completo (Ctrl/Cmd+A para seleccionar todo, luego copia). Mientras más pegues, más encuentra.','One per line':'Uno por línea',"e.g., Never had an account with this collector. / Paid this off in 2023 but it still shows a balance.":'p. ej., Nunca tuve cuenta con este cobrador. / Pagué esto en 2023 pero aún muestra saldo.'};
+function _directText(c){for(var i=0;i<c.childNodes.length;i++){var nd=c.childNodes[i];if(nd.nodeType===3&&nd.nodeValue.trim())return true;}return false;}
+function _walk(el){var kids=el.children,i,c,tn,en,key;for(i=0;i<kids.length;i++){c=kids[i];tn=c.tagName;if(tn==='SCRIPT'||tn==='STYLE'||tn==='TEXTAREA'||tn==='INPUT')continue;if(!_orig.has(c))_orig.set(c,c.innerHTML);en=_orig.get(c);key=norm(en);if(ES.hasOwnProperty(key)){var want=(LANG==='es')?ES[key]:en;if(c.innerHTML!==want)c.innerHTML=want;continue;}if(_directText(c)){if(LANG==='en'&&c.innerHTML!==en)c.innerHTML=en;continue;}_walk(c);}}
+function translateAll(){if(_obs)_obs.disconnect();try{_walk(document.body);var ins=document.querySelectorAll('input[placeholder],textarea[placeholder]');for(var i=0;i<ins.length;i++){var el=ins[i];if(!_origPh.has(el))_origPh.set(el,el.getAttribute('placeholder')||'');var pe=_origPh.get(el)||'';var pk=norm(pe);el.setAttribute('placeholder',(LANG==='es'&&ES_PH.hasOwnProperty(pk))?ES_PH[pk]:pe);}}catch(e){}document.documentElement.lang=LANG;updateLangBtns();if(_obs&&LANG==='es')_obs.observe(document.body,{childList:true,subtree:true,characterData:true});}
+function scheduleTranslate(){if(_pend)return;_pend=true;Promise.resolve().then(function(){_pend=false;if(LANG==='es')translateAll();});}
+function updateLangBtns(){var e=document.getElementById('lng-en'),s=document.getElementById('lng-es');if(e)e.classList.toggle('on',LANG==='en');if(s)s.classList.toggle('on',LANG==='es');}
+function setLang(l){LANG=l;try{localStorage.setItem('crt_lang',l);}catch(e){}translateAll();toast(LANG==='es'?'Idioma: Español':'Language: English');}
+
 /* ============================ INIT ============================ */
 buildTabs();renderPersonSel();loadProfileForm();renderResources();renderStats();renderLetterChoices();
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 go('start');
+_obs=new MutationObserver(scheduleTranslate);
+translateAll();
 </script>
 </body>
 </html>
