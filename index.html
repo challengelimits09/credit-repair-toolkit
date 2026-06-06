@@ -286,7 +286,8 @@
         <div class="field"><label>OpenAI API key <span style="font-weight:400">(saved on this device only)</span></label><input id="ai_key" type="password" placeholder="sk-..." autocomplete="off"></div>
         <div class="field"><label>Upload report file(s) — PDF, or TXT/HTML</label><input type="file" id="ai_files" accept=".pdf,.txt,.html,.htm" multiple onchange="aiIngest(event)"></div>
       </div>
-      <div style="color:var(--muted);font-size:12.5px">Tip: you can select all 3 bureau PDFs at once. Cost is about half a cent per report. Don't have a key? Use the free manual options below.</div>
+      <div class="field" style="max-width:340px"><label>AI model (powers Laz &amp; the PDF reader)</label><select id="ai_model" onchange="setAiModel()"><option value="gpt-4o">Best — GPT-4o (recommended)</option><option value="gpt-4o-mini">Cheaper &amp; faster — GPT-4o-mini</option></select></div>
+      <div style="color:var(--muted);font-size:12.5px">Tip: you can select all 3 bureau PDFs at once. GPT-4o costs a few cents per report (mini is ~half a cent). Don't have a key? Use the free manual options below.</div>
       <div id="ai_status"></div>
     </div>
 
@@ -663,7 +664,12 @@ var LETTERS={
   bureau_dispute:{cat:'Bureau',name:'Bureau dispute — inaccurate item (FCRA §611)',recipient:'bureau',needs:['item','bureau','reason','attest'],deadlineDays:30,
     desc:'The workhorse. Disputes an inaccurate, incomplete, or unverifiable item with a credit bureau and forces a 30-day reinvestigation.',
     when:'Use first for almost any wrong item. Send to every bureau that reports it.',
-    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Formal Dispute of Inaccurate Information\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nI am writing to formally dispute the following item on my '+B.name+' credit report, which I have reviewed and believe to be inaccurate, incomplete, or unverifiable. Under Section 611 of the Fair Credit Reporting Act (15 U.S.C. § 1681i), you must conduct a reasonable reinvestigation and delete or correct any information that cannot be verified as accurate, complete, and timely.\n\nDisputed item:\n'+itemLines(c.item)+'\nReason for dispute:\n'+(REASONS[c.reason]||'[STATE WHY THIS ITEM IS INACCURATE]')+'\n'+(auditSnippets(c.item).length?'\nSpecific reporting errors I have identified:\n'+auditSnippets(c.item).map(function(s,i){return '  ('+(i+1)+') '+s;}).join('\n')+'\n':'')+'\nI request that you:\n  1. Conduct a reasonable reinvestigation of this item — 15 U.S.C. § 1681i(a)(1);\n  2. Forward all relevant information to the furnisher — § 1681i(a)(2);\n  3. Provide the written results within 30 days, with a description of the method of verification used — § 1681i(a)(6)–(7); and\n  4. Delete or correct the item if it cannot be fully verified.\n\nIf this item cannot be verified with the original furnisher, it must be promptly deleted. Please send an updated copy of my credit report once the reinvestigation is complete.'+enclLine()+signature();}},
+    build:function(c){var B=BUREAUS[c.bureau];var v=variantSeed(c.item);
+      var re=vary(['Re: Formal Dispute of Inaccurate Information','Re: Dispute of Inaccurate / Unverifiable Information','Re: Request for Reinvestigation Under FCRA § 611'],v);
+      var sal=vary(['To Whom It May Concern:','To the Reinvestigation Department:','Dear Sir or Madam:'],v);
+      var open=vary(['I am writing to formally dispute the following item on my '+B.name+' credit report, which I have reviewed and believe to be inaccurate, incomplete, or unverifiable.','After reviewing my '+B.name+' credit report, I am disputing the item below because it is inaccurate, incomplete, or cannot be verified.','I am exercising my rights under the Fair Credit Reporting Act to dispute the following inaccurate or unverifiable item on my '+B.name+' credit report.'],v);
+      var close=vary(['If this item cannot be verified with the original furnisher, it must be promptly deleted. Please send an updated copy of my credit report once the reinvestigation is complete.','Should you be unable to verify this item with the original furnisher, it must be deleted. Kindly mail me an updated report reflecting the outcome.','Any item that cannot be fully verified must be removed. Please provide your written results and an updated copy of my report.'],v);
+      return head(B.addr)+re+'\nConsumer: '+idLine()+'\n\n'+sal+'\n\n'+open+' Under Section 611 of the Fair Credit Reporting Act (15 U.S.C. § 1681i), you must conduct a reasonable reinvestigation and delete or correct any information that cannot be verified as accurate, complete, and timely.\n\nDisputed item:\n'+itemLines(c.item)+'\nReason for dispute:\n'+(REASONS[c.reason]||'[STATE WHY THIS ITEM IS INACCURATE]')+'\n'+(auditSnippets(c.item).length?'\nSpecific reporting errors I have identified:\n'+auditSnippets(c.item).map(function(s,i){return '  ('+(i+1)+') '+s;}).join('\n')+'\n':'')+'\nI request that you:\n  1. Conduct a reasonable reinvestigation of this item — 15 U.S.C. § 1681i(a)(1);\n  2. Forward all relevant information to the furnisher — § 1681i(a)(2);\n  3. Provide the written results within 30 days, with a description of the method of verification used — § 1681i(a)(6)–(7); and\n  4. Delete or correct the item if it cannot be fully verified.\n\n'+close+enclLine()+signature();}},
 
   bureau_mov:{cat:'Bureau',name:'Method of Verification demand (after "verified")',recipient:'bureau',needs:['item','bureau','priordate'],deadlineDays:15,
     desc:'When a bureau says your item was "verified," this demands HOW they verified it. A bare "verified" with no method is not a lawful reinvestigation.',
@@ -743,7 +749,17 @@ var LETTERS={
   intent_to_sue:{cat:'Bureau',name:'Notice of Intent to Sue (FCRA §616/617)',recipient:'bureau',needs:['item','bureau','priordate'],deadlineDays:15,
     desc:'Final escalation. Puts the bureau on notice that you will sue for willful/negligent FCRA violations if they do not delete. Many deletions happen at this stage.',
     when:'Use ONLY after multiple documented disputes (with proof, sent certified) have failed. Keep all prior letters and responses as evidence.',
-    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Notice of Intent to Sue — Willful Noncompliance with the Fair Credit Reporting Act\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nThis is my final notice before I pursue litigation. I have disputed the item below on more than one occasion (including on '+(c.priordate?fmtLong(c.priordate):'[DATE(S) OF PRIOR DISPUTES]')+'), with supporting documentation sent by certified mail, and you have failed to conduct a reasonable reinvestigation or to delete unverifiable information as required by FCRA §611 (15 U.S.C. §1681i) and to follow reasonable procedures to assure maximum possible accuracy under §607(b) (15 U.S.C. §1681e(b)).\n\nItem:\n'+itemLines(c.item)+'\nUnless this item is deleted and a corrected copy of my credit report is mailed to me within 15 days, I will file suit and seek the remedies available under FCRA §616 and §617 (15 U.S.C. §§1681n and 1681o), including statutory damages of up to $1,000 per willful violation, actual damages, court costs, and attorney fees. I have preserved copies of every prior dispute, your responses, and certified-mail receipts as evidence of your noncompliance.'+signature();}}
+    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Notice of Intent to Sue — Willful Noncompliance with the Fair Credit Reporting Act\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nThis is my final notice before I pursue litigation. I have disputed the item below on more than one occasion (including on '+(c.priordate?fmtLong(c.priordate):'[DATE(S) OF PRIOR DISPUTES]')+'), with supporting documentation sent by certified mail, and you have failed to conduct a reasonable reinvestigation or to delete unverifiable information as required by FCRA §611 (15 U.S.C. §1681i) and to follow reasonable procedures to assure maximum possible accuracy under §607(b) (15 U.S.C. §1681e(b)).\n\nItem:\n'+itemLines(c.item)+'\nUnless this item is deleted and a corrected copy of my credit report is mailed to me within 15 days, I will file suit and seek the remedies available under FCRA §616 and §617 (15 U.S.C. §§1681n and 1681o), including statutory damages of up to $1,000 per willful violation, actual damages, court costs, and attorney fees. I have preserved copies of every prior dispute, your responses, and certified-mail receipts as evidence of your noncompliance.'+signature();}},
+
+  complaint_stateag:{cat:'Other',name:'State Attorney General complaint',recipient:'agency',needs:['item','company','narrative'],deadlineDays:20,
+    desc:'A complaint to your State Attorney General\'s consumer-protection division — a second regulator on top of the CFPB. Companies take AG complaints seriously.',
+    when:'Use alongside or after a CFPB complaint when a bureau/furnisher keeps ignoring you.',
+    build:function(c){return 'COMPLAINT — State Attorney General (Consumer Protection Division)\nFile at your state AG website (search: "[your state] attorney general consumer complaint").\n\nConsumer: '+idLine()+'\nContact: '+((P().phone)||'[PHONE]')+' | '+((P().email)||'[EMAIL]')+'\nCompany complained about: '+(c.company||'[COMPANY NAME]')+'\n\nWHAT HAPPENED\n'+(c.narrative||'[Describe: what you disputed, the dates, that you mailed certified mail, and how the company failed to investigate, correct, or respond.]')+'\n\nITEM AT ISSUE\n'+itemLines(c.item)+'\nThe company has not met its obligations under the federal Fair Credit Reporting Act (15 U.S.C. § 1681i and § 1681s-2) and applicable state consumer-protection law. Despite my written, certified-mail disputes, the inaccurate or unverified item above has not been corrected or deleted.\n\nRESOLUTION REQUESTED\nAn investigation by your office and assistance compelling the correction or deletion of the inaccurate item, plus written confirmation of the outcome.';}},
+
+  public_record_verification:{cat:'Bureau',name:'Public-record verification challenge (FCRA §611)',recipient:'bureau',needs:['item','bureau'],deadlineDays:30,
+    desc:'Powerful for bankruptcies, judgments & liens. Courts do NOT report or certify records to the bureaus — the data comes from third-party vendors and is often wrong. This forces them to prove how they verified it.',
+    when:'Use for any public record (great for a bankruptcy), especially after a generic "verified" response.',
+    build:function(c){var B=BUREAUS[c.bureau];return head(B.addr)+'Re: Dispute of Public Record — Verification Required (FCRA § 611)\nConsumer: '+idLine()+'\n\nTo Whom It May Concern:\n\nYou are reporting the public record below. I dispute it as inaccurate, incomplete, and/or unverifiable. Courts and government agencies do NOT report or certify public-record information directly to consumer reporting agencies; this data is typically purchased from third-party vendors and is frequently inaccurate. Under Section 611 of the FCRA (15 U.S.C. § 1681i) you must conduct a reasonable reinvestigation and verify this item against the original source.\n\nPublic record:\n'+itemLines(c.item)+'\nPlease provide a description of the procedure used to verify this record — including the name, address, and (if available) telephone number of the source actually contacted and the date of contact — as required by § 1681i(a)(7). If you cannot show that this record was verified directly with the court of record, including every reported detail (filing date, disposition/status, amounts, and identifying information), it must be deleted as unverifiable. A third-party vendor "match" is not verification.'+enclLine('and any court documents showing the correct status')+signature();}}
 };
 
 /* ============================ STRATEGY ENGINE ============================ */
@@ -779,6 +795,7 @@ function recommendFor(it){
       add('bureau_inquiry','Dispute the unauthorized pull with each bureau showing it.');
       break;
     case 'public_record':
+      add('public_record_verification','Force them to prove how the court record was verified (courts don\'t certify to bureaus).');
       add('bureau_dispute','Dispute inaccuracies; most judgments shouldn\'t even be on modern reports.');
       add('bureau_obsolete','If older than 7 years (10 for Ch.7), demand removal as obsolete.');
       add('complaint_cfpb','Escalate if not corrected.');
@@ -796,6 +813,40 @@ function recommendFor(it){
       add('furnisher_dispute','Dispute directly with the furnisher.');
   }
   return steps;
+}
+
+/* ============================ BEAST MODE: history · escalation · variation · docs ============================ */
+function itemRefOf(it){return it?(it.creditor+(it.account?' · '+it.account:'')):'—';}
+function itemHistory(it){var ref=itemRefOf(it);var ls=(person().letters||[]).filter(function(e){return e.itemRef===ref;});return {count:ls.length,letters:ls,statuses:ls.map(function(e){return e.status;}),names:ls.map(function(e){return (e.name||'').toLowerCase();})};}
+function hashStr(s){var h=0,i;for(i=0;i<(s||'').length;i++){h=((h<<5)-h+s.charCodeAt(i))|0;}return Math.abs(h);}
+function vary(arr,seed){return arr[((seed%arr.length)+arr.length)%arr.length];}
+function variantSeed(it){return (it?itemHistory(it).count+hashStr(it.id||it.creditor||''):0);}
+function lettersForItem(it){return itemHistory(it).names.join(' || ');}
+function sentAlready(it,letterId){var nm=(LETTERS[letterId]?LETTERS[letterId].name.split('(')[0].trim().toLowerCase():'');return nm&&lettersForItem(it).indexOf(nm)>=0;}
+/* Round-aware next move(s): looks at what's been sent + the bureaus' responses */
+function nextMoves(it){
+  var hist=itemHistory(it),base=recommendFor(it),st=hist.statuses.join(' | '),steps=[];
+  if(hist.count===0)return base; // Round 1 = the base plan
+  if(/Verified \(escalate\)/.test(st)){steps.push({id:'bureau_mov',note:'They said "verified" — demand the method of verification (FCRA §611(a)(7)).'});steps.push({id:'furnisher_dispute',note:'Open a second front: dispute directly with the furnisher (§623).'});}
+  if(/No response \(escalate\)/.test(st)){steps.push({id:'bureau_noresponse',note:'30+ days, no result — demand deletion (§611(a)(5)(A)).'});steps.push({id:'complaint_cfpb',note:'File a CFPB complaint — usually forces a real response in ~15 days.'});}
+  if(it.category==='public_record')steps.push({id:'public_record_verification',note:'Challenge how the court record was "verified" — courts don\'t certify data to bureaus.'});
+  if(hist.count>=2){steps.push({id:'complaint_cfpb',note:'Escalate to the CFPB.'});steps.push({id:'complaint_stateag',note:'Add a State Attorney General complaint.'});steps.push({id:'intent_to_sue',note:'Final notice before suit (§616/617) — frequently triggers deletion.'});}
+  if(!steps.length){base.forEach(function(s){if(!sentAlready(it,s.id))steps.push(s);});}
+  if(!steps.length)steps.push({id:'intent_to_sue',note:'You\'ve run the standard rounds — escalate to intent-to-sue or talk to an FCRA attorney.'});
+  var seen={},out=[];steps.forEach(function(s){if(!seen[s.id]&&LETTERS[s.id]&&!sentAlready(it,s.id))out.push(s),seen[s.id]=1;});
+  if(!out.length)out.push(steps[0]);
+  return out;
+}
+/* Documentation coach: exactly what to enclose for THIS item */
+function docsFor(it){
+  var d=['A copy of your government photo ID','A utility bill / bank statement showing your current address'];
+  if(!it)return d;
+  if(it.category==='inquiry')return ['A copy of your government photo ID'];
+  if(it.category==='not_mine_fraud'){d.push('Your FTC Identity Theft Report (IdentityTheft.gov)');d.push('A police report, if you filed one');}
+  if(/paid|settl|zero|\$0/i.test((it.status||''))||it.accuracy==='inaccurate'){if(it.category==='collection'||it.category==='chargeoff'||it.category==='repossession')d.push('Proof of payment/settlement if you paid (receipt, bank record, or settlement letter)');}
+  if(it.category==='account_late')d.push('Bank statements showing on-time payments for the months in dispute');
+  if(it.category==='public_record')d.push('Court documents showing the correct status (dismissal/discharge order, or proof it is not yours)');
+  return d;
 }
 
 /* ============================ NAV ============================ */
@@ -869,7 +920,7 @@ function renderItems(){
       +'<div class="row-actions"><button class="btn ghost sm" onclick="editItem(\''+it.id+'\')">Edit</button><button class="btn danger sm" onclick="deleteItem(\''+it.id+'\')">Delete</button></div>'
       +'</div>'
       +'<div style="margin-top:12px;border-top:1px dashed var(--line);padding-top:10px"><b style="font-size:13px;color:var(--muted)">RECOMMENDED:</b> '
-      +recommendFor(it).map(function(s){return'<button class="btn ghost sm" style="margin:4px 4px 0 0" onclick="quickGen(\''+it.id+'\',\''+s.id+'\')">'+LETTERS[s.id].name.split('(')[0].trim()+'</button>';}).join('')+'</div>'
+      +nextMoves(it).map(function(s){return'<button class="btn ghost sm" style="margin:4px 4px 0 0" onclick="quickGen(\''+it.id+'\',\''+s.id+'\')">'+LETTERS[s.id].name.split('(')[0].trim()+'</button>';}).join('')+'</div>'
       +'</div>';
   }).join('');
 }
@@ -978,10 +1029,16 @@ function openModal(L,text){
   document.getElementById('modal').classList.add('open');
 }
 function enclosureChecklist(L){
-  var items=['Sign the letter in ink before mailing','Make a photocopy of the signed letter for your records','Send by USPS <b>Certified Mail, Return Receipt Requested</b> — keep the green card &amp; tracking #'];
-  if(L.recipient==='bureau'){items.unshift('Enclose a copy of your <b>photo ID</b> and a <b>utility bill</b> (proof of address)');}
-  if(L.needs.indexOf('ftc')>=0){items.unshift('Enclose your <b>FTC Identity Theft Report</b> from IdentityTheft.gov');}
-  return'<div class="card" style="margin:14px 0 0;background:#f7fafc"><b style="font-size:13px;color:var(--muted)">BEFORE YOU MAIL — CHECKLIST</b><ul class="checklist">'+items.map(function(t){return'<li><input type="checkbox">'+'<span>'+t+'</span></li>';}).join('')+'</ul></div>';
+  var it=(currentLetter&&currentLetter.meta)?currentLetter.meta.item:null;var items;
+  if(L.recipient==='agency'){
+    items=['Paste this narrative into the online form (CFPB: consumerfinance.gov/complaint, or your State AG site)','Attach the same proof you sent the bureau, if uploads are allowed','Save the confirmation / case number when you submit'];
+  }else{
+    items=docsFor(it).map(function(d){return '<b>Enclose:</b> '+d;});
+    items.push('Sign the letter in ink before mailing');
+    items.push('Make a photocopy of the signed letter for your records');
+    items.push('Send by USPS <b>Certified Mail, Return Receipt Requested</b> — keep the green card &amp; tracking #');
+  }
+  return'<div class="card" style="margin:14px 0 0;background:#f7fafc"><b style="font-size:13px;color:var(--muted)">BEFORE YOU '+(L.recipient==='agency'?'SUBMIT':'MAIL')+' — CHECKLIST</b><ul class="checklist">'+items.map(function(t){return'<li><input type="checkbox"><span>'+t+'</span></li>';}).join('')+'</ul></div>';
 }
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 function copyLetter(){var t=document.getElementById('letterText');t.select();try{document.execCommand('copy');}catch(e){}if(navigator.clipboard){navigator.clipboard.writeText(t.value);}toast('Letter copied');}
@@ -1165,7 +1222,7 @@ function renderOverview(){
   var ins='<div class="card"><h3 style="margin-top:0">💡 Smart suggestions</h3><ul class="clean">'+overviewInsights(items).map(function(t){return'<li>'+t+'</li>';}).join('')+'</ul></div>';
   var batch='<div class="card" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;border:2px solid var(--teal)"><b>⚡ One-click:</b><button class="btn alt" onclick="lazDoNextStep()">✨ Let Laz do my next step</button><button class="btn" onclick="generateRound1()">🖨 Generate all Round-1 bureau letters</button><span style="color:var(--muted);font-size:13px">Let the AI generate everything you should send right now — or build the Round-1 batch yourself.</span></div>';
   var rows=items.map(function(it){
-    var p=priorityOf(it),steps=recommendFor(it),step=steps[0],L=step?LETTERS[step.id]:null;
+    var p=priorityOf(it),steps=nextMoves(it),step=steps[0],L=step?LETTERS[step.id]:null;
     return '<tr>'
       +'<td><span class="pill '+p.cls+'">'+p.label+'</span></td>'
       +'<td><b>'+esc(it.creditor)+'</b>'+(it.account?'<div style="color:var(--muted);font-size:12px">'+esc(it.account)+'</div>':'')+'</td>'
@@ -1177,7 +1234,7 @@ function renderOverview(){
       +'<td>'+(step?'<button class="btn ghost sm" onclick="quickGen(\''+it.id+'\',\''+step.id+'\')">Generate ✍️</button>':'')+'</td>'
       +'</tr>';
   }).join('');
-  var matrix='<div class="card" style="overflow-x:auto"><h3 style="margin-top:0">Your items — by priority &amp; bureau</h3><table><tr><th>Priority</th><th>Creditor</th><th>Type</th><th>EQ&nbsp;/&nbsp;EX&nbsp;/&nbsp;TU</th><th>Amount</th><th>🔬 Leverage / errors</th><th>Recommended first step</th><th></th></tr>'+rows+'</table><div style="margin-top:8px;color:var(--muted);font-size:12px">✓ = item is reported on that bureau · faded = not reported there. Edit any item on the <b>Negative Items</b> tab.</div></div>';
+  var matrix='<div class="card" style="overflow-x:auto"><h3 style="margin-top:0">Your items — by priority &amp; bureau</h3><table><tr><th>Priority</th><th>Creditor</th><th>Type</th><th>EQ&nbsp;/&nbsp;EX&nbsp;/&nbsp;TU</th><th>Amount</th><th>🔬 Leverage / errors</th><th>Recommended next step</th><th></th></tr>'+rows+'</table><div style="margin-top:8px;color:var(--muted);font-size:12px">✓ = item is reported on that bureau · faded = not reported there. Edit any item on the <b>Negative Items</b> tab.</div></div>';
   box.innerHTML=score+plan+cards+ins+batch+matrix;
 }
 function generateRound1(){
@@ -1299,7 +1356,8 @@ function addScanned(){
 
 /* ============================ AI UPLOAD (OpenAI) ============================ */
 function aiKey(){var f=document.getElementById('ai_key');var k=f&&f.value.trim();if(k){localStorage.setItem('crt_openai_key',k);return k;}return localStorage.getItem('crt_openai_key')||'';}
-function loadAiKey(){var f=document.getElementById('ai_key');if(f&&!f.value)f.value=localStorage.getItem('crt_openai_key')||'';}
+function loadAiKey(){var f=document.getElementById('ai_key');if(f&&!f.value)f.value=localStorage.getItem('crt_openai_key')||'';var m=document.getElementById('ai_model');if(m)m.value=localStorage.getItem('crt_ai_model')||'gpt-4o';}
+function setAiModel(){var m=document.getElementById('ai_model');if(m)localStorage.setItem('crt_ai_model',m.value);}
 function setAiStatus(msg,kind){var el=document.getElementById('ai_status');if(el)el.innerHTML='<div class="note '+(kind||'')+'" style="margin:12px 0 0">'+msg+'</div>';}
 function redactSSN(t){return(t||'').replace(/\b\d{3}-\d{2}-\d{4}\b/g,'XXX-XX-XXXX').replace(/\b(ssn|social security)\b[:#\s]*\d{6,9}/gi,'$1: XXXXX');}
 function detectBureau(t){t=(t||'').toLowerCase();var c={equifax:(t.match(/equifax/g)||[]).length,experian:(t.match(/experian/g)||[]).length,transunion:(t.match(/trans\s?union/g)||[]).length};var best='',n=0;Object.keys(c).forEach(function(k){if(c[k]>n){n=c[k];best=k;}});return n?best:'';}
@@ -1308,7 +1366,7 @@ function extractPdfText(file){return new Promise(function(res){var fr=new FileRe
 function aiParseText(text,hint){
   var key=aiKey();if(!key)return Promise.reject(new Error('Enter your OpenAI API key first.'));
   var sys='You are a credit-report parser. From the report text, extract ONLY negative/adverse items a consumer would dispute: collections, charge-offs, accounts with late payments, repossessions, foreclosures, public records (bankruptcies, judgments, tax liens), and hard inquiries. SKIP positive accounts (paid as agreed, never late, current, in good standing, pays as agreed). Merge nothing; list each adverse account once. Return STRICT JSON only: {"items":[{"creditor":"name","account_last4":"digits or blank","type":"collection|chargeoff|account_late|repossession|public_record|inquiry|other","balance":"digits only or blank","date_opened":"YYYY-MM-DD or blank","dofd":"YYYY-MM-DD or blank","status":"short status","bureau":"equifax|experian|transunion or blank"}]}. If the bureau is not stated in the text, use the provided hint. Never invent items.';
-  var body={model:(localStorage.getItem('crt_ai_model')||'gpt-4o-mini'),temperature:0,response_format:{type:'json_object'},messages:[{role:'system',content:sys},{role:'user',content:'Bureau hint: '+(hint||'unknown')+'\n\nREPORT TEXT:\n'+redactSSN(text).slice(0,180000)}]};
+  var body={model:(localStorage.getItem('crt_ai_model')||'gpt-4o'),temperature:0,response_format:{type:'json_object'},messages:[{role:'system',content:sys},{role:'user',content:'Bureau hint: '+(hint||'unknown')+'\n\nREPORT TEXT:\n'+redactSSN(text).slice(0,180000)}]};
   return fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(j){if(j.error)throw new Error(j.error.message||'OpenAI API error');var c=j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;if(!c)throw new Error('Empty AI response');var data=JSON.parse(c);return data.items||[];});
 }
 function aiIngest(ev){
@@ -1350,7 +1408,8 @@ var LAZ_TOOLS=[
   {type:'function',function:{name:'list_items',description:'List the user current negative credit items with id, creditor, type, bureaus, amount, and recommended first letter.',parameters:{type:'object',properties:{}}}},
   {type:'function',function:{name:'generate_round_one',description:'Generate ALL recommended Round-1 dispute letters for every disputable item (one per bureau), opening them ready to print. Use when the user says to do their next step or start.',parameters:{type:'object',properties:{}}}},
   {type:'function',function:{name:'generate_letter',description:'Generate and open ONE specific letter for ONE item. Pass the item_id (from list_items). If letter_id is omitted the recommended one is used.',parameters:{type:'object',properties:{item_id:{type:'string'},letter_id:{type:'string'}},required:['item_id']}}},
-  {type:'function',function:{name:'open_tab',description:'Switch the app to a tab so the user can see it.',parameters:{type:'object',properties:{tab:{type:'string',enum:['start','info','items','overview','strategy','letters','tracker','learn','resources']}},required:['tab']}}}
+  {type:'function',function:{name:'open_tab',description:'Switch the app to a tab so the user can see it.',parameters:{type:'object',properties:{tab:{type:'string',enum:['start','info','items','overview','strategy','letters','tracker','learn','resources']}},required:['tab']}}},
+  {type:'function',function:{name:'documents_for',description:'Return exactly which documents/proof the user should enclose with the dispute for a given item id.',parameters:{type:'object',properties:{item_id:{type:'string'}},required:['item_id']}}}
 ];
 function lazLettersBrief(){return Object.keys(LETTERS).map(function(id){return id+' = '+LETTERS[id].name+' ('+LETTERS[id].when+')';}).join('\n');}
 function lazSituation(){var p=P(),its=person().items||[];var lines=its.map(function(it){var f=auditItem(it).map(function(x){return x.tag;});return '- ['+it.id+'] '+(it.creditor||'?')+' · '+CATLABEL[it.category]+' · '+((it.bureaus||[]).join('/')||'?')+(it.amount?' · $'+it.amount:'')+(f.length?' · flags: '+f.join(', '):'');});var sc=its.length?estimateScore(its):null;return 'Profile name: '+(p.fullName||'(not entered yet)')+'\nActive person: '+person().label+'\nNegative items ('+its.length+'):\n'+(lines.join('\n')||'  (none yet — guide them to import their reports)')+'\nLetters logged so far: '+(person().letters.length)+(sc?'\nEstimated score now ~'+sc.current+', potential after cleanup ~'+sc.projected:'');}
@@ -1367,7 +1426,8 @@ function lazSystem(){
 function lazTool(name,args){
   try{
     if((name==='generate_round_one'||name==='generate_letter')&&profileMissing().length){return JSON.stringify({error:'profile_incomplete',missing:profileMissing(),instruction:'Do NOT say letters were generated. In the user\'s language, tell them to open the My Info tab and fill their full name and mailing address first (and SSN last-4), then ask you again. Offer to walk them through it.'});}
-    if(name==='list_items')return JSON.stringify((person().items||[]).map(function(it){return {id:it.id,creditor:it.creditor,type:it.category,bureaus:it.bureaus,amount:it.amount,recommended:(recommendFor(it)[0]||{}).id};}));
+    if(name==='list_items')return JSON.stringify((person().items||[]).map(function(it){return {id:it.id,creditor:it.creditor,type:it.category,bureaus:it.bureaus,amount:it.amount,recommended_next:(nextMoves(it)[0]||{}).id,rounds_sent:itemHistory(it).count};}));
+    if(name==='documents_for'){var di=(person().items||[]).find(function(x){return x.id===args.item_id;});return JSON.stringify({documents:docsFor(di)});}
     if(name==='generate_round_one'){var n=generateRound1();return JSON.stringify({generated_letters:n,note:n?'Letters are open on screen, ready to print.':'No bureau-dispute items; use generate_letter for collector/creditor letters.'});}
     if(name==='generate_letter'){var it=(person().items||[]).find(function(x){return x.id===args.item_id;});if(!it)return JSON.stringify({error:'no item with that id; call list_items first'});var lid=args.letter_id||(recommendFor(it)[0]||{}).id||'bureau_dispute';if(!LETTERS[lid])lid='bureau_dispute';quickGen(it.id,lid);return JSON.stringify({opened:lid,name:LETTERS[lid].name,for:it.creditor});}
     if(name==='open_tab'){go(args.tab||'overview');return JSON.stringify({opened:args.tab});}
@@ -1376,7 +1436,7 @@ function lazTool(name,args){
 }
 function lazLoop(msgs,depth){
   if(depth>4)return Promise.resolve(LX('That needed too many steps — ask me again more specifically.','Eso requirió demasiados pasos — pregúntame de nuevo de forma más específica.'));
-  var body={model:(localStorage.getItem('crt_ai_model')||'gpt-4o-mini'),temperature:0.45,messages:msgs,tools:LAZ_TOOLS,tool_choice:'auto'};
+  var body={model:(localStorage.getItem('crt_ai_model')||'gpt-4o'),temperature:0.45,messages:msgs,tools:LAZ_TOOLS,tool_choice:'auto'};
   return fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey()},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(j){
     if(j.error)throw new Error(j.error.message||'API error');
     var m=j.choices&&j.choices[0]&&j.choices[0].message;if(!m)throw new Error('No response');
@@ -1465,7 +1525,7 @@ var ES={
 /* overview / dynamic labels */
 'negative items':'ítems negativos','on Equifax':'en Equifax','on Experian':'en Experian','on TransUnion':'en TransUnion','in collections / charge-offs':'en cobranzas / cancelados','high priority':'prioridad alta','disputable':'disputables','goodwill only':'solo buena fe','EST. SCORE NOW':'PUNTAJE EST. AHORA','POTENTIAL AFTER CLEANUP':'POTENCIAL TRAS LIMPIEZA',
 '✅ What to do now':'✅ Qué hacer ahora','💡 Smart suggestions':'💡 Sugerencias inteligentes',
-'Your items — by priority &amp; bureau':'Tus ítems — por prioridad y buró','Priority':'Prioridad','Creditor':'Acreedor','Type':'Tipo','Amount':'Monto','🔬 Leverage / errors':'🔬 Ventaja / errores','Recommended first step':'Primer paso recomendado','Generate ✍️':'Generar ✍️',
+'Your items — by priority &amp; bureau':'Tus ítems — por prioridad y buró','Priority':'Prioridad','Creditor':'Acreedor','Type':'Tipo','Amount':'Monto','🔬 Leverage / errors':'🔬 Ventaja / errores','Recommended first step':'Primer paso recomendado','Recommended next step':'Siguiente paso recomendado','Generate ✍️':'Generar ✍️',
 'High':'Alta','Medium':'Media','Low':'Baja',
 'Collection':'Cobranza','Charge-off':'Cuenta cancelada','Late payments':'Pagos atrasados','Not mine / fraud':'No es mía / fraude','Hard inquiry':'Consulta dura','Public record':'Registro público','Personal info':'Datos personales',
 'RECOMMENDED:':'RECOMENDADO:','Your items':'Tus ítems',
