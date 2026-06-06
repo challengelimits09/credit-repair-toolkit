@@ -177,6 +177,7 @@
     <div class="spacer"></div>
     <div class="lang-tog"><button id="lng-en" onclick="setLang('en')">EN</button><button id="lng-es" onclick="setLang('es')">ES</button></div>
     <span class="privacy-badge">🔒 100% private — saved only in this browser</span>
+    <span id="appver" style="font-size:11px;color:#fff;opacity:.55;align-self:center" title="App version — should match on every device">v1.2 · Jun 6</span>
     <button class="hbtn" onclick="exportData()">⬇ Backup</button>
     <button class="hbtn" onclick="document.getElementById('importFile').click()">⬆ Restore</button>
     <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(event)">
