@@ -153,11 +153,12 @@
   /* Print */
   #printArea{display:none}
   @media print{
-    body{background:#fff}
-    header.app,nav.tabs,main{display:none !important}
-    #printArea{display:block;font-family:"Times New Roman",Georgia,serif;font-size:12.5pt;line-height:1.5;
-      color:#000;white-space:pre-wrap;padding:0.5in}
-    .pb{page-break-after:always}
+    @page{size:portrait;margin:0.6in}
+    body{background:#fff !important}
+    body > *{display:none !important}
+    #printArea{display:block !important;font-family:"Times New Roman",Georgia,serif;font-size:12pt;line-height:1.5;
+      color:#000;white-space:pre-wrap}
+    #printArea .pb{page-break-after:always}
   }
 </style>
 </head>
@@ -647,6 +648,8 @@ function escAttr(s){return esc(s).replace(/"/g,'&quot;');}
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},1900);}
 
 function P(){return person().profile||{};}
+function profileMissing(){var p=P(),m=[];if(!p.fullName)m.push('fullName');if(!p.address1)m.push('address1');if(!p.city)m.push('city');if(!p.state)m.push('state');if(!p.zip)m.push('zip');return m;}
+function requireProfile(){if(profileMissing().length){toast(LX('First fill your info (name + mailing address) so the letters aren\'t blank.','Primero completa tu información (nombre + dirección) para que las cartas no salgan en blanco.'));go('info');var f=document.getElementById('p_fullName');if(f)try{f.focus();}catch(e){}return false;}return true;}
 function senderBlock(){var p=P();var s=(p.fullName||'[YOUR FULL NAME]')+'\n'+(p.address1||'[YOUR STREET ADDRESS]')+'\n';if(p.address2)s+=p.address2+'\n';var city=[(p.city||'[CITY]'),(p.state||'[ST]')].join(', ');s+=city+' '+(p.zip||'[ZIP]');return s;}
 function idLine(){var p=P();var bits=[(p.fullName||'[YOUR FULL NAME]')];if(p.dob)bits.push('DOB: '+fmtLong(p.dob));bits.push('SSN: xxx-xx-'+(p.ssnLast4||'XXXX'));return bits.join('  |  ');}
 function signature(){var p=P();var s='\n\nRespectfully,\n\n\n______________________________\n'+(p.fullName||'[YOUR FULL NAME]');if(p.ssnLast4)s+='\nSSN: xxx-xx-'+p.ssnLast4;if(p.dob)s+='\nDOB: '+fmtLong(p.dob);return s;}
@@ -939,10 +942,12 @@ function generateFromForm(){
   var id=document.getElementById('l_type').value;var L=LETTERS[id];if(!L)return;
   if(L.needs.indexOf('attest')>=0&&!document.getElementById('l_attest').checked){toast('Please confirm the good-faith attestation first');return;}
   if(L.needs.indexOf('item')>=0&&person().items.length===0){toast('Add an item first (Negative Items tab)');return;}
+  if(!requireProfile())return;
   var c=gatherCtx(L);
   buildAndShow(id,c);
 }
 function quickGen(itemId,letterId){
+  if(!requireProfile())return;
   var L=LETTERS[letterId];var it=person().items.find(function(x){return x.id===itemId;});
   var c={item:it};
   if(L.needs.indexOf('bureau')>=0)c.bureau='all';
@@ -1176,6 +1181,7 @@ function renderOverview(){
   box.innerHTML=score+plan+cards+ins+batch+matrix;
 }
 function generateRound1(){
+  if(!requireProfile())return 0;
   var CLEAN=['bureau_dispute','bureau_obsolete'];var parts=[],n=0;
   person().items.forEach(function(it){
     var steps=recommendFor(it),step=null;
@@ -1360,6 +1366,7 @@ function lazSystem(){
 }
 function lazTool(name,args){
   try{
+    if((name==='generate_round_one'||name==='generate_letter')&&profileMissing().length){return JSON.stringify({error:'profile_incomplete',missing:profileMissing(),instruction:'Do NOT say letters were generated. In the user\'s language, tell them to open the My Info tab and fill their full name and mailing address first (and SSN last-4), then ask you again. Offer to walk them through it.'});}
     if(name==='list_items')return JSON.stringify((person().items||[]).map(function(it){return {id:it.id,creditor:it.creditor,type:it.category,bureaus:it.bureaus,amount:it.amount,recommended:(recommendFor(it)[0]||{}).id};}));
     if(name==='generate_round_one'){var n=generateRound1();return JSON.stringify({generated_letters:n,note:n?'Letters are open on screen, ready to print.':'No bureau-dispute items; use generate_letter for collector/creditor letters.'});}
     if(name==='generate_letter'){var it=(person().items||[]).find(function(x){return x.id===args.item_id;});if(!it)return JSON.stringify({error:'no item with that id; call list_items first'});var lid=args.letter_id||(recommendFor(it)[0]||{}).id||'bureau_dispute';if(!LETTERS[lid])lid='bureau_dispute';quickGen(it.id,lid);return JSON.stringify({opened:lid,name:LETTERS[lid].name,for:it.creditor});}
