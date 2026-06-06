@@ -131,6 +131,25 @@
   .stat .s b{display:block;font-size:26px;color:var(--teal-d)}
   .stat .s span{font-size:12px;color:var(--muted)}
   .legal{font-size:12px;color:var(--muted);background:#fff;border:1px dashed var(--line);border-radius:10px;padding:14px;margin-top:18px}
+  /* Laz chat */
+  .laz-fab{position:fixed;bottom:20px;right:20px;z-index:300;background:linear-gradient(135deg,var(--navy),var(--teal));color:#fff;border:none;border-radius:999px;padding:13px 20px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,.32);display:flex;align-items:center;gap:8px}
+  .laz-fab:hover{filter:brightness(1.08)}
+  .laz-panel{position:fixed;bottom:86px;right:20px;width:390px;max-width:calc(100vw - 28px);height:580px;max-height:calc(100vh - 120px);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 28px 70px rgba(0,0,0,.34);z-index:300;display:none;flex-direction:column;overflow:hidden}
+  .laz-panel.open{display:flex}
+  .laz-head{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:14px 16px;display:flex;align-items:center;gap:11px}
+  .laz-head .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#2bb3a3);display:grid;place-items:center;font-weight:800;font-size:18px}
+  .laz-head b{font-size:15px;line-height:1.1}.laz-head small{display:block;opacity:.82;font-size:11px}
+  .laz-msgs{flex:1;overflow-y:auto;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
+  .laz-msg{max-width:86%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.46;white-space:pre-wrap;word-wrap:break-word}
+  .laz-msg.u{align-self:flex-end;background:var(--teal);color:#fff;border-bottom-right-radius:4px}
+  .laz-msg.a{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
+  .laz-typing{align-self:flex-start;color:var(--muted);font-size:13px;font-style:italic}
+  .laz-foot{padding:10px;border-top:1px solid var(--line);display:flex;gap:8px;background:#fff}
+  .laz-foot input{flex:1}
+  .laz-x{margin-left:auto;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1}
+  .laz-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 10px 10px;background:#fff}
+  .laz-chips button{background:var(--chip);color:var(--teal-d);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer}
+  @media print{.laz-fab,.laz-panel{display:none !important}}
   /* Print */
   #printArea{display:none}
   @media print{
@@ -542,6 +561,21 @@
       <button class="btn alt sm" onclick="printLetter()">🖨 Print / Save PDF</button>
       <button class="btn sm" onclick="saveToTracker()">✅ Save to Tracker</button>
     </div>
+  </div>
+</div>
+
+<button class="laz-fab" id="lazFab" onclick="lazToggle()">💬 <span>Ask Laz</span></button>
+<div class="laz-panel" id="lazPanel">
+  <div class="laz-head">
+    <div class="av">L</div>
+    <div><b>Laz</b><small>Your credit coach</small></div>
+    <button class="laz-x" onclick="lazToggle()">×</button>
+  </div>
+  <div class="laz-msgs" id="lazMsgs"></div>
+  <div class="laz-chips" id="lazChips"></div>
+  <div class="laz-foot">
+    <input id="lazInput" placeholder="Ask me anything…" onkeydown="if(event.key==='Enter')lazSend()" autocomplete="off">
+    <button class="btn sm" onclick="lazSend()">Send</button>
   </div>
 </div>
 
@@ -1124,7 +1158,7 @@ function renderOverview(){
     +'<div style="flex:1;min-width:220px;color:var(--muted);font-size:11px">Rough estimate of relative impact — NOT a real FICO score. Your true score also depends on utilization, account age, and positive history.</div></div>';
   var plan='<div class="card" style="border-left:5px solid var(--teal)"><h3 style="margin-top:0">✅ What to do now</h3><ol class="clean" style="margin:0">'+buildActionPlan().map(function(a){return '<li style="margin:7px 0">'+esc(a.t)+' <a href="#" onclick="go(\''+a.go+'\');return false" style="font-size:12px">open →</a></li>';}).join('')+'</ol></div>';
   var ins='<div class="card"><h3 style="margin-top:0">💡 Smart suggestions</h3><ul class="clean">'+overviewInsights(items).map(function(t){return'<li>'+t+'</li>';}).join('')+'</ul></div>';
-  var batch='<div class="card" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;border:2px solid var(--teal)"><b>⚡ One-click:</b><button class="btn" onclick="generateRound1()">🖨 Generate all Round-1 bureau letters</button><span style="color:var(--muted);font-size:13px">Builds a dispute for every disputable item, on every bureau it appears — all in one printable batch.</span></div>';
+  var batch='<div class="card" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;border:2px solid var(--teal)"><b>⚡ One-click:</b><button class="btn alt" onclick="lazDoNextStep()">✨ Let Laz do my next step</button><button class="btn" onclick="generateRound1()">🖨 Generate all Round-1 bureau letters</button><span style="color:var(--muted);font-size:13px">Let the AI generate everything you should send right now — or build the Round-1 batch yourself.</span></div>';
   var rows=items.map(function(it){
     var p=priorityOf(it),steps=recommendFor(it),step=steps[0],L=step?LETTERS[step.id]:null;
     return '<tr>'
@@ -1149,10 +1183,11 @@ function generateRound1(){
     if(!step)return;var L=LETTERS[step.id];var bs=(it.bureaus&&it.bureaus.length)?it.bureaus:BKEYS;
     bs.forEach(function(b){parts.push(L.build({item:it,bureau:b,reason:defaultReason(it)}));n++;});
   });
-  if(!n){toast('These items use collector/creditor letters — generate those from the table.');return;}
+  if(!n){toast('These items use collector/creditor letters — generate those from the table.');return 0;}
   var pseudo={name:'Round 1 — '+n+' bureau letter(s)',cat:'Bureau',recipient:'bureau',needs:[]};
   currentLetter={id:'round1',text:parts.join(PB),meta:{recipient:'bureau',bureau:'all',item:null,deadlineDays:30,name:pseudo.name}};
   openModal(pseudo,parts.join(PB));
+  return n;
 }
 
 /* ============================ RESOURCES ============================ */
@@ -1303,6 +1338,64 @@ function renamePerson(){var p=person();var n=prompt('Rename this person:',p.labe
 function deletePerson(){if(DATA.people.length<=1){alert('You need at least one person. Add another first if you want to remove this one.');return;}var p=person();if(!confirm('Remove '+p.label+" and ALL of their info, items, and letters? This can't be undone. (Use Backup first if unsure.)"))return;DATA.people=DATA.people.filter(function(x){return x.id!==p.id;});DATA.activePersonId=DATA.people[0].id;save();refreshAll();go('info');toast('Removed');}
 function refreshAll(){renderPersonSel();resetItemForm();loadProfileForm();renderItems();renderOverview();renderStrategy();renderTracker();renderStats();renderLetterChoices();}
 
+/* ============================ LAZ — AI COACH ============================ */
+var lazMsgs=[];
+var LAZ_TOOLS=[
+  {type:'function',function:{name:'list_items',description:'List the user current negative credit items with id, creditor, type, bureaus, amount, and recommended first letter.',parameters:{type:'object',properties:{}}}},
+  {type:'function',function:{name:'generate_round_one',description:'Generate ALL recommended Round-1 dispute letters for every disputable item (one per bureau), opening them ready to print. Use when the user says to do their next step or start.',parameters:{type:'object',properties:{}}}},
+  {type:'function',function:{name:'generate_letter',description:'Generate and open ONE specific letter for ONE item. Pass the item_id (from list_items). If letter_id is omitted the recommended one is used.',parameters:{type:'object',properties:{item_id:{type:'string'},letter_id:{type:'string'}},required:['item_id']}}},
+  {type:'function',function:{name:'open_tab',description:'Switch the app to a tab so the user can see it.',parameters:{type:'object',properties:{tab:{type:'string',enum:['start','info','items','overview','strategy','letters','tracker','learn','resources']}},required:['tab']}}}
+];
+function lazLettersBrief(){return Object.keys(LETTERS).map(function(id){return id+' = '+LETTERS[id].name+' ('+LETTERS[id].when+')';}).join('\n');}
+function lazSituation(){var p=P(),its=person().items||[];var lines=its.map(function(it){var f=auditItem(it).map(function(x){return x.tag;});return '- ['+it.id+'] '+(it.creditor||'?')+' · '+CATLABEL[it.category]+' · '+((it.bureaus||[]).join('/')||'?')+(it.amount?' · $'+it.amount:'')+(f.length?' · flags: '+f.join(', '):'');});var sc=its.length?estimateScore(its):null;return 'Profile name: '+(p.fullName||'(not entered yet)')+'\nActive person: '+person().label+'\nNegative items ('+its.length+'):\n'+(lines.join('\n')||'  (none yet — guide them to import their reports)')+'\nLetters logged so far: '+(person().letters.length)+(sc?'\nEstimated score now ~'+sc.current+', potential after cleanup ~'+sc.projected:'');}
+function lazSystem(){
+  return 'You are "Laz", a sharp, confident, motivating credit-repair coach built into a free self-help app. Personality: encouraging, a little swagger, plain-spoken, never condescending — a coach in the user corner. You help people fix their OWN credit legally using the FCRA and FDCPA.\n'
+  +'RULES: Keep replies short and actionable (2-6 sentences or tight bullets). Be accurate. NEVER suggest disputing information the user knows is accurate, using a CPN/fake SSN, "new credit identity", or anything illegal — explain why and offer the legal route (goodwill, validation, negotiation) instead. The dispute LETTERS are always written in English because U.S. bureaus require it, even when you chat in Spanish.\n'
+  +'LANGUAGE: Respond ONLY in '+(LANG==='es'?'Spanish (español)':'English')+'.\n'
+  +'ACTIONS: You can actually operate the app with tools. When the user asks you to "do" a step, start, or generate letters, CALL the tools (generate_round_one, generate_letter, list_items, open_tab) to do it for real, then briefly explain what you did and the next move (print, sign, mail USPS certified with return receipt, wait 30 days, then escalate). Do not just describe — act.\n\n'
+  +'THE PROCESS YOU COACH:\n1) Get all 3 reports free (AnnualCreditReport.com). 2) Freeze credit + opt out. 3) List negative items (or AI-upload PDFs). 4) Round 1: dispute inaccurate/unverifiable items with every bureau (for collections, send debt validation FIRST). 5) Mail certified, return receipt; keep copies; one item per letter. 6) Bureaus have 30 days. 7) Escalate: if "verified", demand Method of Verification + dispute the furnisher directly; if no response, demand deletion + CFPB complaint; last resort, intent-to-sue (FCRA §616/617).\n'
+  +'KEY LAW: FCRA §611 (30-day reinvestigation), §609 (disclosure), §623 (furnisher duties), §605 (7-yr / 10-yr limits), §605B (4-day identity-theft block). FDCPA §1692g (validation), §1692c (cease contact). Strong leverage: cross-bureau inconsistencies, a balance on a charged-off account (should be $0 under Metro 2), and improper re-aging of the DOFD.\n\n'
+  +'AVAILABLE LETTERS (id = name (when)):\n'+lazLettersBrief()+'\n\n'
+  +'THE USER RIGHT NOW:\n'+lazSituation();
+}
+function lazTool(name,args){
+  try{
+    if(name==='list_items')return JSON.stringify((person().items||[]).map(function(it){return {id:it.id,creditor:it.creditor,type:it.category,bureaus:it.bureaus,amount:it.amount,recommended:(recommendFor(it)[0]||{}).id};}));
+    if(name==='generate_round_one'){var n=generateRound1();return JSON.stringify({generated_letters:n,note:n?'Letters are open on screen, ready to print.':'No bureau-dispute items; use generate_letter for collector/creditor letters.'});}
+    if(name==='generate_letter'){var it=(person().items||[]).find(function(x){return x.id===args.item_id;});if(!it)return JSON.stringify({error:'no item with that id; call list_items first'});var lid=args.letter_id||(recommendFor(it)[0]||{}).id||'bureau_dispute';if(!LETTERS[lid])lid='bureau_dispute';quickGen(it.id,lid);return JSON.stringify({opened:lid,name:LETTERS[lid].name,for:it.creditor});}
+    if(name==='open_tab'){go(args.tab||'overview');return JSON.stringify({opened:args.tab});}
+  }catch(e){return JSON.stringify({error:String(e&&e.message||e)});}
+  return JSON.stringify({error:'unknown tool'});
+}
+function lazLoop(msgs,depth){
+  if(depth>4)return Promise.resolve(LX('That needed too many steps — ask me again more specifically.','Eso requirió demasiados pasos — pregúntame de nuevo de forma más específica.'));
+  var body={model:(localStorage.getItem('crt_ai_model')||'gpt-4o-mini'),temperature:0.45,messages:msgs,tools:LAZ_TOOLS,tool_choice:'auto'};
+  return fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey()},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(j){
+    if(j.error)throw new Error(j.error.message||'API error');
+    var m=j.choices&&j.choices[0]&&j.choices[0].message;if(!m)throw new Error('No response');
+    if(m.tool_calls&&m.tool_calls.length){
+      msgs.push(m);
+      m.tool_calls.forEach(function(tc){var out=lazTool(tc.function.name,(function(){try{return JSON.parse(tc.function.arguments||'{}');}catch(e){return{};}})());msgs.push({role:'tool',tool_call_id:tc.id,content:out});});
+      return lazLoop(msgs,depth+1);
+    }
+    return m.content||'';
+  });
+}
+function lazComplete(){var msgs=[{role:'system',content:lazSystem()}].concat(lazMsgs.map(function(m){return {role:m.role,content:m.content};}));return lazLoop(msgs,0);}
+function lazPush(role,content){lazMsgs.push({role:role,content:content});}
+function lazRender(typing){var box=document.getElementById('lazMsgs');if(!box)return;box.innerHTML=lazMsgs.map(function(m){return '<div class="laz-msg '+(m.role==='user'?'u':'a')+'">'+esc(m.content)+'</div>';}).join('')+(typing?'<div class="laz-typing">'+LX('Laz is typing…','Laz está escribiendo…')+'</div>':'');box.scrollTop=box.scrollHeight;}
+function lazChips(){var box=document.getElementById('lazChips');if(!box)return;var chips=LANG==='es'?[['Haz mi siguiente paso','Haz mi siguiente paso: genera todo lo que debo enviar ahora y explícame qué hacer.'],['¿Qué es un charge-off?','Explícame en términos simples qué es un charge-off y cómo lo disputo.'],['¿Por dónde empiezo?','¿Por dónde empiezo con mi crédito? Dame el plan.']]:[['Do my next step','Do my next step: generate everything I should send right now and tell me what to do.'],['What is a charge-off?','Explain in simple terms what a charge-off is and how I dispute it.'],['Where do I start?','Where do I start with my credit? Give me the plan.']];box.innerHTML=chips.map(function(c){return '<button onclick="lazQuick('+JSON.stringify(c[1]).replace(/"/g,'&quot;')+')">'+esc(c[0])+'</button>';}).join('');}
+function lazGreet(){lazPush('assistant',LX("Hey — I'm Laz, your credit coach. 💪 Ask me anything, or hit a button below. Say \"do my next step\" and I'll generate exactly what you should send right now.","¡Hola! Soy Laz, tu coach de crédito. 💪 Pregúntame lo que sea o toca un botón abajo. Di \"haz mi siguiente paso\" y genero justo lo que debes enviar ahora."));lazRender();lazChips();}
+function lazToggle(){var p=document.getElementById('lazPanel');var open=p.classList.toggle('open');if(open){lazChips();if(!lazMsgs.length)lazGreet();var i=document.getElementById('lazInput');if(i)i.focus();}}
+function lazQuick(text){var i=document.getElementById('lazInput');i.value=text;lazSend();}
+function lazDoNextStep(){var p=document.getElementById('lazPanel');p.classList.add('open');lazChips();if(!lazMsgs.length)lazGreet();lazQuick(LX('Do my next step: generate everything I should send right now and tell me exactly what to do with it.','Haz mi siguiente paso: genera todo lo que debo enviar ahora y dime exactamente qué hacer con ello.'));}
+function lazSend(){
+  var inp=document.getElementById('lazInput');var text=(inp.value||'').trim();if(!text)return;
+  if(!aiKey()){lazPush('user',text);lazPush('assistant',LX('Add your OpenAI API key in the "Negative Items" tab (top card) and I\'ll come alive. For a public product, this connects to a Render backend instead.','Agrega tu clave API de OpenAI en la pestaña "Ítems negativos" (tarjeta de arriba) y cobraré vida. Para un producto público, esto se conectaría a un backend en Render.'));inp.value='';lazRender();return;}
+  lazPush('user',text);inp.value='';lazRender(true);
+  lazComplete().then(function(reply){lazPush('assistant',reply||'…');lazRender();lazChips();}).catch(function(e){lazPush('assistant',LX('Hmm, I hit an error: ','Ups, tuve un error: ')+(e&&e.message||e));lazRender();});
+}
+
 /* ============================ I18N (English / Spanish) ============================ */
 var LANG=(function(){try{return localStorage.getItem('crt_lang')||'en';}catch(e){return'en';}})();
 function LX(en,es){return LANG==='es'?es:en;}
@@ -1400,9 +1493,12 @@ var ES={
 'Resources &amp; Addresses':'Recursos y direcciones','Verified contacts. Mailing addresses for disputes differ from corporate HQ — these go to the right department.':'Contactos verificados. Las direcciones para disputas son distintas a las oficinas corporativas — estas llegan al departamento correcto.','Free credit reports':'Reportes de crédito gratis','Stop new damage':'Detén nuevo daño','File a complaint (free leverage)':'Presenta una queja (ventaja gratis)','Identity theft':'Robo de identidad','Free / low-cost human help':'Ayuda humana gratis / de bajo costo','Mail disputes to:':'Envía las disputas a:',
 /* modal */
 'Review and edit anything in brackets, then <b>print or copy</b>. Sign in ink. <b>Mail certified, return receipt requested</b>, and keep a copy.':'Revisa y edita lo que esté entre corchetes, luego <b>imprime o copia</b>. Firma con tinta. <b>Envía por correo certificado con acuse de recibo</b> y guarda una copia. (La carta va en inglés porque así la exigen los burós en EE. UU.)',
-'📋 Copy':'📋 Copiar','⬇ Download .txt':'⬇ Descargar .txt','🖨 Print / Save PDF':'🖨 Imprimir / Guardar PDF','✅ Save to Tracker':'✅ Guardar en Seguimiento'
+'📋 Copy':'📋 Copiar','⬇ Download .txt':'⬇ Descargar .txt','🖨 Print / Save PDF':'🖨 Imprimir / Guardar PDF','✅ Save to Tracker':'✅ Guardar en Seguimiento',
+/* Laz chat + autopilot */
+'Ask Laz':'Habla con Laz','Your credit coach':'Tu coach de crédito','Send':'Enviar','✨ Let Laz do my next step':'✨ Deja que Laz haga el siguiente paso',
+'Let the AI generate everything you should send right now — or build the Round-1 batch yourself.':'Deja que la IA genere todo lo que debes enviar ahora — o crea tú mismo el lote de la Ronda 1.'
 };
-var ES_PH={'Paste the whole report (Ctrl/Cmd+A to select all on the page, then copy). The more you paste, the more it finds.':'Pega el reporte completo (Ctrl/Cmd+A para seleccionar todo, luego copia). Mientras más pegues, más encuentra.','One per line':'Uno por línea',"e.g., Never had an account with this collector. / Paid this off in 2023 but it still shows a balance.":'p. ej., Nunca tuve cuenta con este cobrador. / Pagué esto en 2023 pero aún muestra saldo.'};
+var ES_PH={'Paste the whole report (Ctrl/Cmd+A to select all on the page, then copy). The more you paste, the more it finds.':'Pega el reporte completo (Ctrl/Cmd+A para seleccionar todo, luego copia). Mientras más pegues, más encuentra.','One per line':'Uno por línea','Ask me anything…':'Pregúntame lo que sea…',"e.g., Never had an account with this collector. / Paid this off in 2023 but it still shows a balance.":'p. ej., Nunca tuve cuenta con este cobrador. / Pagué esto en 2023 pero aún muestra saldo.'};
 function _directText(c){for(var i=0;i<c.childNodes.length;i++){var nd=c.childNodes[i];if(nd.nodeType===3&&nd.nodeValue.trim())return true;}return false;}
 function _walk(el){var kids=el.children,i,c,tn,en,key;for(i=0;i<kids.length;i++){c=kids[i];tn=c.tagName;if(tn==='SCRIPT'||tn==='STYLE'||tn==='TEXTAREA'||tn==='INPUT')continue;if(!_orig.has(c))_orig.set(c,c.innerHTML);en=_orig.get(c);key=norm(en);if(ES.hasOwnProperty(key)){var want=(LANG==='es')?ES[key]:en;if(c.innerHTML!==want)c.innerHTML=want;continue;}if(_directText(c)){if(LANG==='en'&&c.innerHTML!==en)c.innerHTML=en;continue;}_walk(c);}}
 function translateAll(){if(_obs)_obs.disconnect();try{_walk(document.body);var ins=document.querySelectorAll('input[placeholder],textarea[placeholder]');for(var i=0;i<ins.length;i++){var el=ins[i];if(!_origPh.has(el))_origPh.set(el,el.getAttribute('placeholder')||'');var pe=_origPh.get(el)||'';var pk=norm(pe);el.setAttribute('placeholder',(LANG==='es'&&ES_PH.hasOwnProperty(pk))?ES_PH[pk]:pe);}}catch(e){}document.documentElement.lang=LANG;updateLangBtns();if(_obs&&LANG==='es')_obs.observe(document.body,{childList:true,subtree:true,characterData:true});}
