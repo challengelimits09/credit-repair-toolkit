@@ -594,7 +594,7 @@ function normalize(d){
   if(!d||typeof d!=='object')return defaultData();
   if(!d.people){var nid=uid();d={people:[{id:nid,label:'Me',profile:d.profile||{},items:d.items||[],letters:d.letters||[]}],activePersonId:nid};}
   if(!Array.isArray(d.people)||!d.people.length)return defaultData();
-  d.people.forEach(function(p){if(!p.id)p.id=uid();p.profile=p.profile||{};p.items=p.items||[];p.letters=p.letters||[];p.label=p.label||'Person';});
+  d.people.forEach(function(p){if(!p.id)p.id=uid();p.profile=p.profile||{};p.items=p.items||[];p.letters=p.letters||[];p.reports=p.reports||[];p.label=p.label||'Person';});
   if(!d.activePersonId||!d.people.some(function(p){return p.id===d.activePersonId;}))d.activePersonId=d.people[0].id;
   return d;
 }
@@ -1336,6 +1336,7 @@ function scanReport(){
   var box=document.getElementById('imp_results');
   if(!text.trim()){box.innerHTML='<div class="note warn">Paste your report text (or upload a file) first.</div>';return;}
   var cands=parseReport(text);window.__scan=cands;
+  storeReport('pasted report',(document.getElementById('imp_bureau')||{}).value||'',text);
   if(!cands.length){box.innerHTML='<div class="note warn">No obvious negative items detected automatically. Your report format may be unusual — try pasting a different section, or add items manually below.</div>';return;}
   var rows=cands.map(function(c,idx){
     return '<tr>'
@@ -1386,6 +1387,16 @@ function setAiModel(){var m=document.getElementById('ai_model');if(m)localStorag
 function setAiStatus(msg,kind){var el=document.getElementById('ai_status');if(el)el.innerHTML='<div class="note '+(kind||'')+'" style="margin:12px 0 0">'+msg+'</div>';}
 function redactSSN(t){return(t||'').replace(/\b\d{3}-\d{2}-\d{4}\b/g,'XXX-XX-XXXX').replace(/\b(ssn|social security)\b[:#\s]*\d{6,9}/gi,'$1: XXXXX');}
 function detectBureau(t){t=(t||'').toLowerCase();var c={equifax:(t.match(/equifax/g)||[]).length,experian:(t.match(/experian/g)||[]).length,transunion:(t.match(/trans\s?union/g)||[]).length};var best='',n=0;Object.keys(c).forEach(function(k){if(c[k]>n){n=c[k];best=k;}});return n?best:'';}
+/* Keep the FULL report text so Laz can answer detail questions (SSN-redacted, stays on device) */
+function storeReport(name,bureau,text){if(!text||text.length<40)return;if(!person().reports)person().reports=[];var reps=person().reports.filter(function(r){return r.name!==name;});reps.push({name:name||'report',bureau:bureau||'',text:redactSSN(text).slice(0,500000),at:todayISO()});person().reports=reps.slice(-4);try{save();}catch(e){person().reports=person().reports.slice(-1);try{save();}catch(e2){}}}
+function searchReports(query){
+  var reps=person().reports||[];
+  if(!reps.length)return JSON.stringify({error:'no_full_report',hint:'Tell the user to re-upload their report PDF on the Negative Items tab so I can read every detail.'});
+  var q=(query||'').toLowerCase().split(/\s+/).filter(Boolean),hits=[];
+  reps.forEach(function(r){var lines=(r.text||'').split(/\r?\n/);for(var i=0;i<lines.length&&hits.length<60;i++){var lc=(lines[i]||'').toLowerCase();if(q.length&&q.every(function(t){return lc.indexOf(t)>=0;})){hits.push('['+(r.bureau||r.name||'')+'] '+lines.slice(Math.max(0,i-1),i+2).join(' / ').replace(/\s+/g,' ').trim().slice(0,260));}}});
+  if(!hits.length)return JSON.stringify({matches:0,note:'No lines matched. Try ONE keyword (a creditor name, "first delinquency", "date opened", "date reported", or a year like 2017).'});
+  return JSON.stringify({matches:hits.length,excerpts:hits.slice(0,45)});
+}
 function readTextFile(file){return new Promise(function(res){var fr=new FileReader();fr.onload=function(){var t=fr.result||'';if(/\.html?$/i.test(file.name)||/<[a-z][\s\S]*>/i.test(t.slice(0,400))){t=t.replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<\/(tr|div|p|li|table|h[1-6])>/gi,'\n').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ');}res(t);};fr.onerror=function(){res('');};fr.readAsText(file);});}
 function extractPdfText(file){return new Promise(function(res){var fr=new FileReader();fr.onload=function(){if(!window.pdfjsLib){res('');return;}try{pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';}catch(e){}pdfjsLib.getDocument({data:new Uint8Array(fr.result)}).promise.then(function(pdf){var nums=[];for(var i=1;i<=pdf.numPages;i++)nums.push(i);var chunks=[];var seq=nums.reduce(function(pr,n){return pr.then(function(){return pdf.getPage(n).then(function(pg){return pg.getTextContent();}).then(function(tc){var lastY=null,line=[],lines=[];tc.items.forEach(function(it){var y=it.transform?it.transform[5]:null;if(lastY!==null&&y!==null&&Math.abs(y-lastY)>3){lines.push(line.join(' '));line=[];}line.push(it.str);lastY=y;});if(line.length)lines.push(line.join(' '));chunks.push(lines.join('\n'));});});},Promise.resolve());return seq.then(function(){res(chunks.join('\n'));});}).catch(function(){res('');});};fr.onerror=function(){res('');};fr.readAsArrayBuffer(file);});}
 function aiParseText(text,hint){
@@ -1405,6 +1416,7 @@ function aiIngest(ev){
     return getText.then(function(text){
       if(!text||text.length<40){errs.push(esc(file.name)+': couldn\'t read text (scanned image PDF?)');return;}
       var hint=detectBureau(text);
+      storeReport(file.name,hint,text);
       return aiParseText(text,hint).then(function(items){
         items.forEach(function(it){
           var cat=it.type||'other';var bur=it.bureau||hint;var bureaus=bur?[bur]:['equifax','experian','transunion'];
@@ -1430,7 +1442,8 @@ function refreshAll(){renderPersonSel();resetItemForm();loadProfileForm();render
 /* ============================ LAZ — AI COACH ============================ */
 var lazMsgs=[];
 var LAZ_TOOLS=[
-  {type:'function',function:{name:'list_items',description:'List the user current negative credit items with id, creditor, type, bureaus, amount, and recommended first letter.',parameters:{type:'object',properties:{}}}},
+  {type:'function',function:{name:'list_items',description:'List the user current tracked negative items with id, creditor, type, bureaus, amount, date_opened, dofd (date of first delinquency), status, and recommended next letter. Use for counts and ages of the tracked items.',parameters:{type:'object',properties:{}}}},
+  {type:'function',function:{name:'search_report',description:'Search the user\'s FULL uploaded credit report text for ANY detail not in the item list — exact dates, "date reported", date of first delinquency, positive accounts, hard inquiries, addresses, employers, or a specific year. Returns matching excerpts. ALWAYS use this before telling the user you do not know something about their report.',parameters:{type:'object',properties:{query:{type:'string',description:'keywords, e.g. a creditor name, "first delinquency", "date opened", "inquiry", or a year like 2017'}},required:['query']}}},
   {type:'function',function:{name:'generate_round_one',description:'Generate ALL recommended Round-1 dispute letters for every disputable item (one per bureau), opening them ready to print. Use when the user says to do their next step or start.',parameters:{type:'object',properties:{}}}},
   {type:'function',function:{name:'generate_letter',description:'Generate and open ONE specific letter for ONE item. Pass the item_id (from list_items). If letter_id is omitted the recommended one is used.',parameters:{type:'object',properties:{item_id:{type:'string'},letter_id:{type:'string'}},required:['item_id']}}},
   {type:'function',function:{name:'open_tab',description:'Switch the app to a tab so the user can see it.',parameters:{type:'object',properties:{tab:{type:'string',enum:['start','info','items','overview','strategy','letters','tracker','learn','resources']}},required:['tab']}}},
@@ -1445,13 +1458,16 @@ function lazSystem(){
   +'ACTIONS: You can actually operate the app with tools. When the user asks you to "do" a step, start, or generate letters, CALL the tools (generate_round_one, generate_letter, list_items, open_tab) to do it for real, then briefly explain what you did and the next move (print, sign, mail USPS certified with return receipt, wait 30 days, then escalate). Do not just describe — act.\n\n'
   +'THE PROCESS YOU COACH:\n1) Get all 3 reports free (AnnualCreditReport.com). 2) Freeze credit + opt out. 3) List negative items (or AI-upload PDFs). 4) Round 1: dispute inaccurate/unverifiable items with every bureau (for collections, send debt validation FIRST). 5) Mail certified, return receipt; keep copies; one item per letter. 6) Bureaus have 30 days. 7) Escalate: if "verified", demand Method of Verification + dispute the furnisher directly; if no response, demand deletion + CFPB complaint; last resort, intent-to-sue (FCRA §616/617).\n'
   +'KEY LAW: FCRA §611 (30-day reinvestigation), §609 (disclosure), §623 (furnisher duties), §605 (7-yr / 10-yr limits), §605B (4-day identity-theft block). FDCPA §1692g (validation), §1692c (cease contact). Strong leverage: cross-bureau inconsistencies, a balance on a charged-off account (should be $0 under Metro 2), and improper re-aging of the DOFD.\n\n'
+  +'TODAY: '+todayISO()+'. Ages: an item is past the FCRA 7-year reporting limit when its date of first delinquency (or original delinquency) is ~7+ years before today (10 years for a Chapter 7 bankruptcy). When asked "how many are older than 7 years," check each item\'s dofd / date_opened from list_items AND use search_report for exact dates of any accounts not in the list.\n'
+  +'FULL REPORT ACCESS: '+(function(){var r=person().reports||[];return r.length?(r.length+' uploaded report(s) on file ('+r.map(function(x){return x.bureau||x.name;}).join(', ')+'). Use search_report to look up ANY detail — exact dates, "date reported", positive accounts, inquiries, addresses, employers. If a question needs a detail you do not already have, SEARCH the report first; never say you cannot tell without searching.'):'No full report text is stored yet — if the user asks for details you do not have, tell them (in their language) to re-upload their report PDF on the Negative Items tab so you can read every detail.';})()+'\n\n'
   +'AVAILABLE LETTERS (id = name (when)):\n'+lazLettersBrief()+'\n\n'
   +'THE USER RIGHT NOW:\n'+lazSituation();
 }
 function lazTool(name,args){
   try{
     if((name==='generate_round_one'||name==='generate_letter')&&profileMissing().length){return JSON.stringify({error:'profile_incomplete',missing:profileMissing(),instruction:'Do NOT say letters were generated. In the user\'s language, tell them to open the My Info tab and fill their full name and mailing address first (and SSN last-4), then ask you again. Offer to walk them through it.'});}
-    if(name==='list_items')return JSON.stringify((person().items||[]).map(function(it){return {id:it.id,creditor:it.creditor,type:it.category,bureaus:it.bureaus,amount:it.amount,recommended_next:(nextMoves(it)[0]||{}).id,rounds_sent:itemHistory(it).count};}));
+    if(name==='list_items')return JSON.stringify((person().items||[]).map(function(it){return {id:it.id,creditor:it.creditor,type:it.category,bureaus:it.bureaus,amount:it.amount,date_opened:it.dateOpened||'',dofd:it.dofd||'',status:it.status||'',recommended_next:(nextMoves(it)[0]||{}).id,rounds_sent:itemHistory(it).count};}));
+    if(name==='search_report')return searchReports(args.query);
     if(name==='documents_for'){var di=(person().items||[]).find(function(x){return x.id===args.item_id;});return JSON.stringify({documents:docsFor(di)});}
     if(name==='generate_round_one'){var n=generateRound1();return JSON.stringify({generated_letters:n,note:n?'Letters are open on screen, ready to print.':'No bureau-dispute items; use generate_letter for collector/creditor letters.'});}
     if(name==='generate_letter'){var it=(person().items||[]).find(function(x){return x.id===args.item_id;});if(!it)return JSON.stringify({error:'no item with that id; call list_items first'});var lid=args.letter_id||(recommendFor(it)[0]||{}).id||'bureau_dispute';if(!LETTERS[lid])lid='bureau_dispute';quickGen(it.id,lid);return JSON.stringify({opened:lid,name:LETTERS[lid].name,for:it.creditor});}
