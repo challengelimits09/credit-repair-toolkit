@@ -153,12 +153,13 @@
   /* Print */
   #printArea{display:none}
   @media print{
-    @page{size:portrait;margin:0.6in}
-    body{background:#fff !important}
+    @page{size:portrait;margin:0}                 /* margin:0 removes the browser's URL/date/page-number header & footer */
+    html,body{background:#fff !important}
     body > *{display:none !important}
-    #printArea{display:block !important;font-family:"Times New Roman",Georgia,serif;font-size:12pt;line-height:1.5;
-      color:#000;white-space:pre-wrap}
-    #printArea .pb{page-break-after:always}
+    #printArea{display:block !important;color:#000}
+    #printArea > div{font-family:"Times New Roman",Georgia,serif;font-size:12pt;line-height:1.55;
+      white-space:pre-wrap;padding:0.7in;box-sizing:border-box}   /* our own page margins instead */
+    #printArea > div.pb{page-break-after:always}
   }
 </style>
 </head>
